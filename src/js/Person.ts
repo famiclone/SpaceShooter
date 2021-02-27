@@ -1,18 +1,27 @@
-export default class Person {
-  constructor(ctx, x, y, canvas) {
-    this.ctx = ctx
-    this.x = x
-    this.y = y
+import { PersonProps } from '../types'
+
+export default class Person implements PersonProps {
+  age: number
+  xVelocity: number
+  yVelocity: number
+  width: number
+  height: number
+  active: boolean
+  image: HTMLImageElement
+  canvas: HTMLCanvasElement
+
+  constructor(public ctx: CanvasRenderingContext2D, public x: number, public y: number) {
+    this.canvas = ctx.canvas
     this.age = Math.floor(Math.random() * 128)
     this.xVelocity = 0
     this.yVelocity = 1
     this.width = 32
     this.height = 32
     this.active = true
-    this.canvas = canvas
-    this.inBounds = function () {
-      return this.x >= 0 && this.x <= this.canvas.width && this.y >= 0 && this.y <= this.canvas.height
-    }
+  }
+
+  isBounds() {
+    return this.x >= 0 && this.x <= this.canvas.width && this.y >= 0 && this.y <= this.canvas.height
   }
 
   draw() {
@@ -33,6 +42,6 @@ export default class Person {
 
     this.age++
 
-    this.active = this.active && this.inBounds()
+    this.active = this.active && this.isBounds()
   }
 }

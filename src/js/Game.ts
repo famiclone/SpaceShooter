@@ -1,10 +1,11 @@
-import Background from './Background.js'
-import Player from './Player.js'
-import UI from './UI.js'
-import Enemy from './Enemy.js'
+import Background from './Background'
+import Player from './Player'
+import UI from './UI'
+import Enemy from './Enemy'
 
 import playerSrc from '../images/player.png'
 import enemySrc from '../images/enemy.png'
+import { GameConfigProps, GameProps, Vec2Props } from '../types.js'
 
 const config = {
   width: 320,
@@ -13,28 +14,34 @@ const config = {
 
 const level = {}
 
-export default class Game {
-  constructor() {
-    this.config = config
+export default class Game implements GameProps {
+  level: any
+  canvas: HTMLCanvasElement
+  ctx: CanvasRenderingContext2D
+  ui: HTMLDivElement
+  enemies: any[]
+  score: number
+  bg: any
+  player: any
+
+  constructor(private config: GameConfigProps) {
     this.level = level
     this.canvas = document.createElement('canvas')
     this.ctx = this.canvas.getContext('2d')
     this.ui = document.createElement('div')
     this.ui.className = 'ui'
-    this.keyboardController()
+    this.initKeyboardController()
     document.querySelector('#screen').appendChild(this.canvas)
     document.querySelector('#screen').appendChild(this.ui)
     this.canvas.width = this.config.width
     this.canvas.height = this.config.height
     this.enemies = []
     this.score = 0
-
     this.bg = new Background(this.ctx, this.config)
-
     this.player = new Player(this.ctx, this.canvas.width / 2, this.canvas.height - 48, this.config, playerSrc)
   }
 
-  keyboardController() {
+  initKeyboardController() {
     document.addEventListener('keydown', (event) => {
       switch (event.keyCode) {
         case 87: // w
@@ -56,7 +63,7 @@ export default class Game {
     })
   }
 
-  isCollide(a, b) {
+  isCollide(a: Vec2Props, b: Vec2Props) {
     return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y
   }
 
@@ -108,7 +115,7 @@ export default class Game {
       this.player.y = 0
     }
 
-    this.ui.textContent = this.score
+    this.ui.textContent = this.score.toString()
 
     this.handleCollision()
 
