@@ -1,7 +1,5 @@
 class Star {
-  constructor(public ctx: CanvasRenderingContext2D) {
-    this.canvas = ctx.canvas
-    this.ctx = ctx
+  constructor() {
     this.active = true
     this.x = Math.floor(Math.random() * this.canvas.width)
     this.y = 0
@@ -18,9 +16,9 @@ class Star {
     }
   }
 
-  draw() {
-    this.ctx.fillStyle = this.color
-    this.ctx.fillRect(this.x, this.y, 3, 3)
+  draw(screen) {
+    screen.ctx.fillStyle = this.color
+    screen.ctx.fillRect(this.x, this.y, 3, 3)
   }
 
   update() {
@@ -30,24 +28,22 @@ class Star {
 }
 
 export default class Background {
-  constructor(ctx, canvas) {
-    this.canvas = canvas
-    this.ctx = ctx
+  color: string
+  stars: any[]
+  constructor() {
     this.color = 'black'
-    this.width = this.canvas.width
-    this.height = this.canvas.height
     this.stars = []
   }
 
   drawStars() {
     if (Math.round(Math.random() * 5) == 1) {
-      this.stars.push(new Star(this.ctx, this.canvas))
+      this.stars.push(new Star())
     }
   }
 
-  draw() {
-    this.ctx.fillStyle = this.color
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
+  draw(screen) {
+    screen.ctx.fillStyle = this.color
+    screen.ctx.fillRect(0, 0, screen.width, screen.height)
 
     this.drawStars()
     this.stars.map((star) => {

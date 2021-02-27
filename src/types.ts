@@ -10,11 +10,10 @@ export interface GameConfigProps extends SizeProps {
 export interface Vec2Props {
   x: number
   y: number
-  width: number
-  height: number
 }
 
 export interface GameProps {
+  init(): void
   run(): void
   update(): void
   draw(): void
@@ -24,8 +23,13 @@ export interface GameProps {
 }
 
 export interface PersonProps {
-  update(string): void
-  draw(): void
+  update(): void
+  draw(ctx: CanvasRenderingContext2D): void
   explode(): void
   isBounds(): void
+}
+
+export interface ScreenProps {
+  mount(): void
+  clear(): void
 }

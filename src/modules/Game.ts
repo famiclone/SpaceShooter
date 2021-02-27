@@ -1,60 +1,50 @@
 import Background from './Background'
 import Player from './Player'
 import UI from './UI'
+import Screen from './Screen'
 import Enemy from './Enemy'
+import { GameProps, ScreenProps, GameConfigProps, Vec2Props } from '../types'
 
 import playerSrc from '../images/player.png'
 import enemySrc from '../images/enemy.png'
-import { GameConfigProps, GameProps, Vec2Props } from '../types.js'
-
-const config = {
-  width: 320,
-  height: 280
-}
 
 const level = {}
 
 export default class Game implements GameProps {
+  screen: Screen
   level: any
-  canvas: HTMLCanvasElement
-  ctx: CanvasRenderingContext2D
   ui: HTMLDivElement
-  enemies: any[]
+  enemies: Enemy[]
   score: number
   bg: any
-  player: any
+  player: Player
 
   constructor(private config: GameConfigProps) {
     this.level = level
-    this.canvas = document.createElement('canvas')
-    this.ctx = this.canvas.getContext('2d')
     this.ui = document.createElement('div')
+    this.screen = new Screen({ x: config.width, y: config.height })
     this.ui.className = 'ui'
     this.initKeyboardController()
-    document.querySelector('#screen').appendChild(this.canvas)
-    document.querySelector('#screen').appendChild(this.ui)
-    this.canvas.width = this.config.width
-    this.canvas.height = this.config.height
     this.enemies = []
     this.score = 0
-    this.bg = new Background(this.ctx, this.config)
-    this.player = new Player(this.ctx, this.canvas.width / 2, this.canvas.height - 48, this.config, playerSrc)
+    // this.bg = new Background(this.ctx, this.config)
+    this.player = new Player(this.screen.ctx, { x: this.screen.size.x / 2, y: this.screen.size.y - 48 }, playerSrc)
   }
 
   initKeyboardController() {
     document.addEventListener('keydown', (event) => {
       switch (event.keyCode) {
         case 87: // w
-          this.player.y -= 32
+          this.player.vel.y = 8
           break
         case 65: // a
-          this.player.x -= 32
+          this.player.pos.x -= 8
           break
         case 83: // s
-          this.player.y += 32
+          this.player.pos.y += 8
           break
         case 68: // d
-          this.player.x += 32
+          this.player.pos.x += 8
           break
         case 32: // space
           this.player.shoot()
@@ -63,8 +53,23 @@ export default class Game implements GameProps {
     })
   }
 
-  isCollide(a: Vec2Props, b: Vec2Props) {
-    return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y
+  init() {
+    this.initKeyboardController()
+    this.screen.mount()
+    this.run()
+  }
+
+  isCollide(a, b) {
+    return (
+      a.pos.x < b.pos.x + b.size.x &&
+      a.pos.x + a.size.x > b.pos.x &&
+      a.pos.y < b.pos.y + b.size.y &&
+      a.pos.y + a.size.y > b.pos.y
+    )
+  }
+
+  checkBoundsCollide(obj, boundBox) {
+    return obj.pos.x >= 0 && obj.pos.x <= boundBox.size.x && obj.pos.y >= 0 && obj.pos.y <= boundBox.size.y
   }
 
   handleCollision() {
@@ -86,54 +91,61 @@ export default class Game implements GameProps {
     })
   }
 
-  draw() {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-    this.bg.draw()
-    this.player.draw()
+  draw(screen) {
+    screen.clear()
+    // this.bg.draw()
+    this.player.draw(screen.ctx)
 
     this.enemies.map((enemy) => {
-      enemy.draw()
+      enemy.draw(screen.ctx)
     })
 
     this.player.playerBullets.map((bullet) => {
-      bullet.draw()
+      bullet.draw(screen.ctx)
     })
   }
 
   update() {
     // Screen collision
-    if (this.player.x + this.player.width > this.canvas.width) {
-      this.player.x = this.canvas.width - this.player.width
+    if (this.player.pos.x + this.player.size.x > this.screen.size.x) {
+      this.player.pos.x = this.screen.size.x - this.player.size.x
     }
-    if (this.player.x < 0) {
-      this.player.x = 0
+    if (this.player.pos.x < 0) {
+      this.player.pos.x = 0
     }
-    if (this.player.y + this.player.height > this.canvas.height) {
-      this.player.y = this.canvas.height - this.player.height
+    if (this.player.pos.y + this.player.size.y > this.screen.size.y) {
+      this.player.pos.y = this.screen.size.x - this.player.size.y
     }
-    if (this.player.y < 0) {
-      this.player.y = 0
+    if (this.player.pos.y < 0) {
+      this.player.pos.y = 0
     }
 
     this.ui.textContent = this.score.toString()
 
     this.handleCollision()
 
-    this.player.playerBullets.map((bullet) => bullet.update())
+    this.player.playerBullets.map((bullet) => {
+      if (!this.checkBoundsCollide(bullet, this.screen)) {
+        bullet.active = false
+      } else {
+        bullet.update()
+      }
+    })
+
     this.enemies.map((enemy) => enemy.update())
 
-    this.bg.update()
+    // this.bg.update()
 
     this.enemies = this.enemies.filter((enemy) => enemy.active)
     this.player.playerBullets = this.player.playerBullets.filter((bullet) => bullet.active)
 
     if (Math.round(Math.random() * 90) == 1) {
-      this.enemies.push(new Enemy(this.ctx, 0, 0, this.config, enemySrc))
+      this.enemies.push(new Enemy(this.screen.ctx, { x: 0, y: 0 }, enemySrc))
     }
   }
 
   run() {
-    this.draw()
+    this.draw(this.screen)
     this.update()
 
     requestAnimationFrame(() => this.run())

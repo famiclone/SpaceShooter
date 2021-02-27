@@ -1,4 +1,4 @@
-import Game from './js/Game'
+import Game from './modules/Game'
 import { GameConfigProps, GameProps } from './types'
 
 const gameConfig: GameConfigProps = {
@@ -9,4 +9,4 @@ const gameConfig: GameConfigProps = {
 
 const game: GameProps = new Game(gameConfig)
 
-game.run()
+game.init()

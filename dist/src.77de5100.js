@@ -117,120 +117,69 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"js/Background.ts":[function(require,module,exports) {
+})({"modules/Vec2.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Vec2 = void 0;
+
+var Vec2 =
+/** @class */
+function () {
+  function Vec2(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+
+  Vec2.prototype.set = function (x, y) {
+    this.x = x;
+    this.y = y;
+  };
+
+  return Vec2;
+}();
+
+exports.Vec2 = Vec2;
+},{}],"modules/Person.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var Star =
-/** @class */
-function () {
-  function Star(ctx) {
-    this.ctx = ctx;
-    this.canvas = ctx.canvas;
-    this.ctx = ctx;
-    this.active = true;
-    this.x = Math.floor(Math.random() * this.canvas.width);
-    this.y = 0; // this.dest = Math.random()
-
-    this.dest = 0.5;
-    this.color = "rgba(255, 255, 255, " + this.dest + ")";
-    this.xVelocity = 0;
-    this.yVelocity = this.dest > 0.7 ? 1 : this.dest > 0.5 ? 0.5 : 0.25;
-    this.active = true;
-    this.speed = 20;
-
-    this.inBounds = function () {
-      return this.x >= 0 && this.x <= this.canvas.width && this.y >= 0 && this.y <= this.canvas.height;
-    };
-  }
-
-  Star.prototype.draw = function () {
-    this.ctx.fillStyle = this.color;
-    this.ctx.fillRect(this.x, this.y, 3, 3);
-  };
-
-  Star.prototype.update = function () {
-    this.y += this.yVelocity * this.speed;
-    this.active = this.active && this.inBounds();
-  };
-
-  return Star;
-}();
-
-var Background =
-/** @class */
-function () {
-  function Background(ctx, canvas) {
-    this.canvas = canvas;
-    this.ctx = ctx;
-    this.color = 'black';
-    this.width = this.canvas.width;
-    this.height = this.canvas.height;
-    this.stars = [];
-  }
-
-  Background.prototype.drawStars = function () {
-    if (Math.round(Math.random() * 5) == 1) {
-      this.stars.push(new Star(this.ctx, this.canvas));
-    }
-  };
-
-  Background.prototype.draw = function () {
-    this.ctx.fillStyle = this.color;
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    this.drawStars();
-    this.stars.map(function (star) {
-      star.draw();
-    });
-  };
-
-  Background.prototype.update = function () {
-    this.stars.map(function (star) {
-      star.update();
-    });
-    this.stars = this.stars.filter(function (star) {
-      return star.active;
-    });
-  };
-
-  return Background;
-}();
-
-exports.default = Background;
-},{}],"js/Person.ts":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+var Vec2_1 = require("./Vec2");
 
 var Person =
 /** @class */
 function () {
-  function Person(ctx, x, y) {
+  function Person(ctx, pos, imageSrc, size) {
+    if (size === void 0) {
+      size = new Vec2_1.Vec2(16, 16);
+    }
+
     this.ctx = ctx;
-    this.x = x;
-    this.y = y;
+    this.pos = pos;
+    this.imageSrc = imageSrc;
+    this.size = size;
     this.canvas = ctx.canvas;
     this.age = Math.floor(Math.random() * 128);
-    this.xVelocity = 0;
-    this.yVelocity = 1;
-    this.width = 32;
-    this.height = 32;
+    this.image = new Image();
+    this.image.src = imageSrc;
+    this.pos = new Vec2_1.Vec2(pos.x, pos.y);
     this.active = true;
+    console.log(imageSrc);
   }
 
   Person.prototype.isBounds = function () {
-    return this.x >= 0 && this.x <= this.canvas.width && this.y >= 0 && this.y <= this.canvas.height;
+    return this.pos.x >= 0 && this.pos.x <= this.canvas.width && this.pos.y >= 0 && this.pos.y <= this.canvas.height;
   };
 
-  Person.prototype.draw = function () {
-    //this.ctx.fillStyle = this.color;
-    //this.ctx.fillRect(this.x, this.y, 32, 32);
-    this.ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+  Person.prototype.draw = function (ctx) {
+    // this.ctx.fillStyle = 'green'
+    // this.ctx.fillRect(this.pos.x, this.pos.y, 32, 32)
+    ctx.drawImage(this.image, this.pos.x, this.pos.y, this.size.x, this.size.y);
   };
 
   Person.prototype.explode = function () {
@@ -238,70 +187,48 @@ function () {
   };
 
   Person.prototype.update = function () {
-    this.x += this.xVelocity;
-    this.y += this.yVelocity / 2;
-    this.xVelocity = 3 * Math.sin(this.age * Math.PI / 64);
-    this.age++;
-    this.active = this.active && this.isBounds();
+    this.pos.x += this.vel.x;
+    this.pos.y += this.vel.y / 2;
   };
 
   return Person;
 }();
 
 exports.default = Person;
-},{}],"js/Bullet.js":[function(require,module,exports) {
+},{"./Vec2":"modules/Vec2.ts"}],"modules/Bullet.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = void 0;
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var Vec2_1 = require("./Vec2");
 
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var Bullet = /*#__PURE__*/function () {
-  function Bullet(ctx, x, y, config) {
-    _classCallCheck(this, Bullet);
-
+var Bullet =
+/** @class */
+function () {
+  function Bullet(x, y) {
     this.active = true;
-    this.config = config;
-    this.ctx = ctx;
-    this.x = x;
-    this.y = y;
-    this.width = 3;
-    this.height = 3;
-    this.xVelocity = 0;
-    this.yVelocity = -5;
-
-    this.inBounds = function () {
-      return this.x >= 0 && this.x <= this.config.width && this.y >= 0 && this.y <= this.config.height;
-    };
+    this.pos = new Vec2_1.Vec2(x, y);
+    this.size = new Vec2_1.Vec2(1, 3);
+    this.vel = new Vec2_1.Vec2(0, -5);
   }
 
-  _createClass(Bullet, [{
-    key: "draw",
-    value: function draw() {
-      this.ctx.fillStyle = 'orange';
-      this.ctx.fillRect(this.x, this.y, this.width, this.height + 3);
-    }
-  }, {
-    key: "update",
-    value: function update() {
-      this.y += this.yVelocity;
-      this.x += this.xVelocity;
-      this.active = this.active && this.inBounds();
-    }
-  }]);
+  Bullet.prototype.draw = function (ctx) {
+    ctx.fillStyle = 'orange';
+    ctx.fillRect(this.pos.x, this.pos.y, this.size.x, this.size.y + 3);
+  };
+
+  Bullet.prototype.update = function () {
+    this.pos.x += this.vel.x;
+    this.pos.y += this.vel.y;
+  };
 
   return Bullet;
 }();
 
 exports.default = Bullet;
-},{}],"js/Player.ts":[function(require,module,exports) {
+},{"./Vec2":"modules/Vec2.ts"}],"modules/Player.ts":[function(require,module,exports) {
 "use strict";
 
 var __extends = this && this.__extends || function () {
@@ -344,53 +271,92 @@ Object.defineProperty(exports, "__esModule", {
 
 var Person_1 = __importDefault(require("./Person"));
 
-var Bullet_js_1 = __importDefault(require("./Bullet.js"));
+var Bullet_1 = __importDefault(require("./Bullet"));
+
+var Vec2_1 = require("./Vec2");
 
 var Player =
 /** @class */
 function (_super) {
   __extends(Player, _super);
 
-  function Player(ctx, x, y, config, imageSrc) {
-    var _this = _super.call(this, ctx, x, y) || this;
+  function Player(ctx, pos, imageSrc) {
+    var _this = _super.call(this, ctx, pos, imageSrc, new Vec2_1.Vec2(16, 16)) || this;
 
     _this.ctx = ctx;
-    _this.x = x;
-    _this.y = y;
-    _this.config = config;
+    _this.pos = pos;
     _this.imageSrc = imageSrc;
     _this.color = 'blue';
     _this.width = 21;
     _this.height = 21;
     _this.active = true;
-    _this.image = new Image();
-    _this.image.src = imageSrc;
     _this.playerBullets = [];
+    _this.vel = new Vec2_1.Vec2(0, 0);
     return _this;
   } // Bullet starts in the center of the player
 
 
   Player.prototype.moveToMidpoint = function () {
     return {
-      x: this.x + this.width / 2,
-      y: this.y
+      x: this.pos.x + this.size.x / 2,
+      y: this.pos.y
     };
   };
 
   Player.prototype.shoot = function () {
     var bulletPosition = this.moveToMidpoint();
-    this.playerBullets.push(new Bullet_js_1.default(this.ctx, bulletPosition.x, bulletPosition.y, this.config));
+    this.playerBullets.push(new Bullet_1.default(bulletPosition.x, bulletPosition.y));
   };
 
   Player.prototype.explode = function () {
     this.active = false;
   };
 
+  Player.prototype.update = function () {
+    this.pos.x += this.vel.x;
+    this.pos.y += this.vel.y;
+  };
+
   return Player;
 }(Person_1.default);
 
 exports.default = Player;
-},{"./Person":"js/Person.ts","./Bullet.js":"js/Bullet.js"}],"js/Enemy.ts":[function(require,module,exports) {
+},{"./Person":"modules/Person.ts","./Bullet":"modules/Bullet.ts","./Vec2":"modules/Vec2.ts"}],"modules/Screen.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var Vec2_1 = require("./Vec2");
+
+var Screen =
+/** @class */
+function () {
+  function Screen(size) {
+    this.canvas = document.createElement('canvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.size = new Vec2_1.Vec2(size.x, size.y);
+    this.canvas.width = this.size.x;
+    this.canvas.height = this.size.y;
+  }
+
+  Screen.prototype.clear = function () {
+    this.ctx.clearRect(0, 0, this.size.x, this.size.y);
+  };
+
+  Screen.prototype.mount = function () {
+    var container = document.createElement('div');
+    container.setAttribute('id', 'screen');
+    container.append(this.canvas);
+    document.body.append(container);
+  };
+
+  return Screen;
+}();
+
+exports.default = Screen;
+},{"./Vec2":"modules/Vec2.ts"}],"modules/Enemy.ts":[function(require,module,exports) {
 "use strict";
 
 var __extends = this && this.__extends || function () {
@@ -433,21 +399,20 @@ Object.defineProperty(exports, "__esModule", {
 
 var Person_1 = __importDefault(require("./Person"));
 
+var Vec2_1 = require("./Vec2");
+
 var Enemy =
 /** @class */
 function (_super) {
   __extends(Enemy, _super);
 
-  function Enemy(ctx, x, y, config, imageSrc) {
-    var _this = _super.call(this, ctx, x, y, ctx.canvas) || this;
+  function Enemy(ctx, pos, imageSrc) {
+    var _this = _super.call(this, ctx, pos, imageSrc, new Vec2_1.Vec2(16, 16)) || this;
 
-    _this.color = 'red';
     _this.image = new Image();
     _this.image.src = imageSrc;
-    _this.x = Math.round(ctx.canvas.width / 4 + Math.random() * ctx.canvas.width / 2);
-    _this.yVelocity = 3;
-    _this.width = 16;
-    _this.height = 16;
+    _this.pos.x = Math.round(ctx.canvas.width / 4 + Math.random() * ctx.canvas.width / 2);
+    _this.vel = new Vec2_1.Vec2(0, 3);
     return _this;
   }
 
@@ -455,15 +420,23 @@ function (_super) {
     this.active = false;
   };
 
+  Enemy.prototype.update = function () {
+    this.pos.x += this.vel.x;
+    this.pos.y += this.vel.y / 2;
+    this.vel.x = 3 * Math.sin(this.age * Math.PI / 64);
+    this.age++;
+    this.active = this.active && this.isBounds();
+  };
+
   return Enemy;
 }(Person_1.default);
 
 exports.default = Enemy;
-},{"./Person":"js/Person.ts"}],"images/player.png":[function(require,module,exports) {
+},{"./Person":"modules/Person.ts","./Vec2":"modules/Vec2.ts"}],"images/player.png":[function(require,module,exports) {
 module.exports = "/player.0ed8be31.png";
 },{}],"images/enemy.png":[function(require,module,exports) {
 module.exports = "/enemy.7261e44d.png";
-},{}],"js/Game.ts":[function(require,module,exports) {
+},{}],"modules/Game.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -476,9 +449,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var Background_1 = __importDefault(require("./Background"));
-
 var Player_1 = __importDefault(require("./Player"));
+
+var Screen_1 = __importDefault(require("./Screen"));
 
 var Enemy_1 = __importDefault(require("./Enemy"));
 
@@ -486,10 +459,6 @@ var player_png_1 = __importDefault(require("../images/player.png"));
 
 var enemy_png_1 = __importDefault(require("../images/enemy.png"));
 
-var config = {
-  width: 320,
-  height: 280
-};
 var level = {};
 
 var Game =
@@ -498,19 +467,20 @@ function () {
   function Game(config) {
     this.config = config;
     this.level = level;
-    this.canvas = document.createElement('canvas');
-    this.ctx = this.canvas.getContext('2d');
     this.ui = document.createElement('div');
+    this.screen = new Screen_1.default({
+      x: config.width,
+      y: config.height
+    });
     this.ui.className = 'ui';
     this.initKeyboardController();
-    document.querySelector('#screen').appendChild(this.canvas);
-    document.querySelector('#screen').appendChild(this.ui);
-    this.canvas.width = this.config.width;
-    this.canvas.height = this.config.height;
     this.enemies = [];
-    this.score = 0;
-    this.bg = new Background_1.default(this.ctx, this.config);
-    this.player = new Player_1.default(this.ctx, this.canvas.width / 2, this.canvas.height - 48, this.config, player_png_1.default);
+    this.score = 0; // this.bg = new Background(this.ctx, this.config)
+
+    this.player = new Player_1.default(this.screen.ctx, {
+      x: this.screen.size.x / 2,
+      y: this.screen.size.y - 48
+    }, player_png_1.default);
   }
 
   Game.prototype.initKeyboardController = function () {
@@ -520,22 +490,22 @@ function () {
       switch (event.keyCode) {
         case 87:
           // w
-          _this.player.y -= 32;
+          _this.player.vel.y = 8;
           break;
 
         case 65:
           // a
-          _this.player.x -= 32;
+          _this.player.pos.x -= 8;
           break;
 
         case 83:
           // s
-          _this.player.y += 32;
+          _this.player.pos.y += 8;
           break;
 
         case 68:
           // d
-          _this.player.x += 32;
+          _this.player.pos.x += 8;
           break;
 
         case 32:
@@ -547,8 +517,18 @@ function () {
     });
   };
 
+  Game.prototype.init = function () {
+    this.initKeyboardController();
+    this.screen.mount();
+    this.run();
+  };
+
   Game.prototype.isCollide = function (a, b) {
-    return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
+    return a.pos.x < b.pos.x + b.size.x && a.pos.x + a.size.x > b.pos.x && a.pos.y < b.pos.y + b.size.y && a.pos.y + a.size.y > b.pos.y;
+  };
+
+  Game.prototype.checkBoundsCollide = function (obj, boundBox) {
+    return obj.pos.x >= 0 && obj.pos.x <= boundBox.size.x && obj.pos.y >= 0 && obj.pos.y <= boundBox.size.y;
   };
 
   Game.prototype.handleCollision = function () {
@@ -572,45 +552,51 @@ function () {
     });
   };
 
-  Game.prototype.draw = function () {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.bg.draw();
-    this.player.draw();
+  Game.prototype.draw = function (screen) {
+    screen.clear(); // this.bg.draw()
+
+    this.player.draw(screen.ctx);
     this.enemies.map(function (enemy) {
-      enemy.draw();
+      enemy.draw(screen.ctx);
     });
     this.player.playerBullets.map(function (bullet) {
-      bullet.draw();
+      bullet.draw(screen.ctx);
     });
   };
 
   Game.prototype.update = function () {
-    // Screen collision
-    if (this.player.x + this.player.width > this.canvas.width) {
-      this.player.x = this.canvas.width - this.player.width;
+    var _this = this; // Screen collision
+
+
+    if (this.player.pos.x + this.player.size.x > this.screen.size.x) {
+      this.player.pos.x = this.screen.size.x - this.player.size.x;
     }
 
-    if (this.player.x < 0) {
-      this.player.x = 0;
+    if (this.player.pos.x < 0) {
+      this.player.pos.x = 0;
     }
 
-    if (this.player.y + this.player.height > this.canvas.height) {
-      this.player.y = this.canvas.height - this.player.height;
+    if (this.player.pos.y + this.player.size.y > this.screen.size.y) {
+      this.player.pos.y = this.screen.size.x - this.player.size.y;
     }
 
-    if (this.player.y < 0) {
-      this.player.y = 0;
+    if (this.player.pos.y < 0) {
+      this.player.pos.y = 0;
     }
 
     this.ui.textContent = this.score.toString();
     this.handleCollision();
     this.player.playerBullets.map(function (bullet) {
-      return bullet.update();
+      if (!_this.checkBoundsCollide(bullet, _this.screen)) {
+        bullet.active = false;
+      } else {
+        bullet.update();
+      }
     });
     this.enemies.map(function (enemy) {
       return enemy.update();
-    });
-    this.bg.update();
+    }); // this.bg.update()
+
     this.enemies = this.enemies.filter(function (enemy) {
       return enemy.active;
     });
@@ -619,14 +605,17 @@ function () {
     });
 
     if (Math.round(Math.random() * 90) == 1) {
-      this.enemies.push(new Enemy_1.default(this.ctx, 0, 0, this.config, enemy_png_1.default));
+      this.enemies.push(new Enemy_1.default(this.screen.ctx, {
+        x: 0,
+        y: 0
+      }, enemy_png_1.default));
     }
   };
 
   Game.prototype.run = function () {
     var _this = this;
 
-    this.draw();
+    this.draw(this.screen);
     this.update();
     requestAnimationFrame(function () {
       return _this.run();
@@ -637,7 +626,7 @@ function () {
 }();
 
 exports.default = Game;
-},{"./Background":"js/Background.ts","./Player":"js/Player.ts","./Enemy":"js/Enemy.ts","../images/player.png":"images/player.png","../images/enemy.png":"images/enemy.png"}],"main.ts":[function(require,module,exports) {
+},{"./Player":"modules/Player.ts","./Screen":"modules/Screen.ts","./Enemy":"modules/Enemy.ts","../images/player.png":"images/player.png","../images/enemy.png":"images/enemy.png"}],"index.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -650,7 +639,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var Game_1 = __importDefault(require("./js/Game"));
+var Game_1 = __importDefault(require("./modules/Game"));
 
 var gameConfig = {
   width: 255,
@@ -658,8 +647,8 @@ var gameConfig = {
   title: 'SpaceShooter'
 };
 var game = new Game_1.default(gameConfig);
-game.run();
-},{"./js/Game":"js/Game.ts"}],"../../../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+game.init();
+},{"./modules/Game":"modules/Game.ts"}],"../../../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -687,7 +676,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54582" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56217" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -863,5 +852,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["../../../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","main.ts"], null)
-//# sourceMappingURL=/main.c39d6dcf.js.map
+},{}]},{},["../../../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","index.ts"], null)
+//# sourceMappingURL=/src.77de5100.js.map
