@@ -1,0 +1,26 @@
+{
+  "name": "spaceshooter",
+  "version": "1.0.0",
+  "description": "Shoot’em up game (WASD (moving), Space (fire))",
+  "main": "main.js",
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/famiclone/SpaceShooter.git"
+  },
+  "keywords": [
+    "game"
+  ],
+  "author": "Denys Tynok",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/famiclone/SpaceShooter/issues"
+  },
+  "homepage": "https://github.com/famiclone/SpaceShooter#readme",
+  "dependencies": {
+    "parcel": "^1.12.4",
+    "typescript": "^4.2.2"
+  },
+  "devDependencies": {}
+}
