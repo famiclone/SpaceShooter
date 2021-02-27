@@ -1,38 +1,36 @@
-import Person from './Person.js';
-import Bullet from './Bullet.js';
+import Person from './Person.js'
+import Bullet from './Bullet.js'
 
 class Player extends Person {
-	constructor(ctx, x, y, config) {
-		super(ctx, x, y)
-		this.config = config;
-		this.color = 'blue';
-		this.width = 21;
-		this.height = 21;
-		this.active = true;
-		this.playerBullets = [];
-		this.midpoint = function() {
-			return {
-				x: this.x + this.width / 2,
-				y: this.y,
-			}	
-		}
-	}
+  constructor(ctx, x, y, config, imageSrc) {
+    super(ctx, x, y)
+    this.config = config
+    this.color = 'blue'
+    this.width = 21
+    this.height = 21
+    this.active = true
+    this.image = new Image()
+    this.image.src = imageSrc
+    this.playerBullets = []
+    this.midpoint = function () {
+      return {
+        x: this.x + this.width / 2,
+        y: this.y
+      }
+    }
 
-	shoot() {
-		let bulletPosition = this.midpoint();
+    console.log(this.image)
+  }
 
-		this.playerBullets.push(new Bullet(
-			this.ctx,
-			bulletPosition.x,
-			bulletPosition.y,
-			this.config
-		));
-	}
+  shoot() {
+    let bulletPosition = this.midpoint()
 
-	explode() {
-		this.active = false;
-	}
+    this.playerBullets.push(new Bullet(this.ctx, bulletPosition.x, bulletPosition.y, this.config))
+  }
 
-};
+  explode() {
+    this.active = false
+  }
+}
 
-export default Player;
+export default Player
