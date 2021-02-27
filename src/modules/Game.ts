@@ -3,14 +3,15 @@ import Player from './Player'
 import UI from './UI'
 import Screen from './Screen'
 import Enemy from './Enemy'
-import { GameProps, ScreenProps, GameConfigProps, Vec2Props } from '../types'
+import { GameConfigProps } from '../types'
+import { checkBoundsCollide } from '../helpers'
 
 import playerSrc from '../images/player.png'
 import enemySrc from '../images/enemy.png'
 
 const level = {}
 
-export default class Game implements GameProps {
+export default class Game {
   screen: Screen
   level: any
   ui: HTMLDivElement
@@ -27,7 +28,7 @@ export default class Game implements GameProps {
     this.initKeyboardController()
     this.enemies = []
     this.score = 0
-    // this.bg = new Background(this.ctx, this.config)
+    this.bg = new Background()
     this.player = new Player(this.screen.ctx, { x: this.screen.size.x / 2, y: this.screen.size.y - 48 }, playerSrc)
   }
 
@@ -35,7 +36,7 @@ export default class Game implements GameProps {
     document.addEventListener('keydown', (event) => {
       switch (event.keyCode) {
         case 87: // w
-          this.player.vel.y = 8
+          this.player.pos.y -= 8
           break
         case 65: // a
           this.player.pos.x -= 8
@@ -68,10 +69,6 @@ export default class Game implements GameProps {
     )
   }
 
-  checkBoundsCollide(obj, boundBox) {
-    return obj.pos.x >= 0 && obj.pos.x <= boundBox.size.x && obj.pos.y >= 0 && obj.pos.y <= boundBox.size.y
-  }
-
   handleCollision() {
     this.player.playerBullets.map((bullet) => {
       this.enemies.map((enemy) => {
@@ -93,7 +90,7 @@ export default class Game implements GameProps {
 
   draw(screen) {
     screen.clear()
-    // this.bg.draw()
+    this.bg.draw(screen.ctx)
     this.player.draw(screen.ctx)
 
     this.enemies.map((enemy) => {
@@ -125,7 +122,7 @@ export default class Game implements GameProps {
     this.handleCollision()
 
     this.player.playerBullets.map((bullet) => {
-      if (!this.checkBoundsCollide(bullet, this.screen)) {
+      if (!checkBoundsCollide(bullet)) {
         bullet.active = false
       } else {
         bullet.update()
@@ -134,7 +131,7 @@ export default class Game implements GameProps {
 
     this.enemies.map((enemy) => enemy.update())
 
-    // this.bg.update()
+    this.bg.update()
 
     this.enemies = this.enemies.filter((enemy) => enemy.active)
     this.player.playerBullets = this.player.playerBullets.filter((bullet) => bullet.active)

@@ -1,12 +1,7 @@
 import Game from './modules/Game'
 import { GameConfigProps, GameProps } from './types'
+import config from './config.json'
 
-const gameConfig: GameConfigProps = {
-  width: 255,
-  height: 240,
-  title: 'SpaceShooter'
-}
-
-const game: GameProps = new Game(gameConfig)
+const game: Game = new Game(config)
 
 game.init()

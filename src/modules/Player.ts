@@ -1,8 +1,8 @@
-import Person from './Person'
+import GameObject from './GameObject'
 import Bullet from './Bullet'
 import { Vec2 } from './Vec2'
 
-class Player extends Person {
+class Player extends GameObject {
   color: string
   width: number
   height: number

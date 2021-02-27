@@ -1,11 +1,11 @@
 import { PersonProps, Vec2Props } from '../types'
 import { Vec2 } from './Vec2'
 
-export default class Person implements PersonProps {
-  age: number
+export default class GameObject {
   active: boolean
   canvas: HTMLCanvasElement
   image: HTMLImageElement
+  vel: Vec2
 
   constructor(
     public ctx: CanvasRenderingContext2D,
@@ -14,7 +14,6 @@ export default class Person implements PersonProps {
     public size: Vec2 = new Vec2(16, 16)
   ) {
     this.canvas = ctx.canvas
-    this.age = Math.floor(Math.random() * 128)
     this.image = new Image()
     this.image.src = imageSrc
     this.pos = new Vec2(pos.x, pos.y)
@@ -28,8 +27,6 @@ export default class Person implements PersonProps {
   }
 
   draw(ctx) {
-    // this.ctx.fillStyle = 'green'
-    // this.ctx.fillRect(this.pos.x, this.pos.y, 32, 32)
     ctx.drawImage(this.image, this.pos.x, this.pos.y, this.size.x, this.size.y)
   }
 

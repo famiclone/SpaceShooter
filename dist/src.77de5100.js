@@ -117,7 +117,45 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"modules/Vec2.ts":[function(require,module,exports) {
+})({"config.json":[function(require,module,exports) {
+module.exports = {
+  "width": 255,
+  "height": 240,
+  "title": "SpaceShooter"
+};
+},{}],"helpers/index.ts":[function(require,module,exports) {
+"use strict";
+
+var __importDefault = this && this.__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.checkBoundsCollide = void 0;
+
+var config_json_1 = __importDefault(require("../config.json"));
+
+var screen = {
+  size: {
+    x: config_json_1.default.width,
+    y: config_json_1.default.height
+  }
+};
+
+function checkBoundsCollide(obj, boundBox) {
+  if (boundBox === void 0) {
+    boundBox = screen;
+  }
+
+  return obj.pos.x >= 0 && obj.pos.x <= boundBox.size.x && obj.pos.y >= 0 && obj.pos.y <= boundBox.size.y;
+}
+
+exports.checkBoundsCollide = checkBoundsCollide;
+},{"../config.json":"config.json"}],"modules/Vec2.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -142,7 +180,86 @@ function () {
 }();
 
 exports.Vec2 = Vec2;
-},{}],"modules/Person.ts":[function(require,module,exports) {
+},{}],"modules/Background.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var helpers_1 = require("../helpers");
+
+var Vec2_1 = require("./Vec2");
+
+var Star =
+/** @class */
+function () {
+  function Star(pos, speed) {
+    if (speed === void 0) {
+      speed = 1;
+    }
+
+    this.pos = pos;
+    this.speed = speed;
+    this.active = true;
+    this.vel = new Vec2_1.Vec2(0, 1);
+    this.color = "rgba(255, 255, 255, " + this.speed / 5 + ")";
+  }
+
+  Star.prototype.draw = function (ctx) {
+    ctx.fillStyle = this.color;
+    ctx.fillRect(this.pos.x, this.pos.y, 3, 3);
+  };
+
+  Star.prototype.update = function () {
+    this.pos.y += this.vel.y * this.speed;
+    this.active = this.active && helpers_1.checkBoundsCollide(this);
+  };
+
+  return Star;
+}();
+
+var Background =
+/** @class */
+function () {
+  function Background() {
+    this.color = 'black';
+    this.stars = [];
+  }
+
+  Background.prototype.drawStars = function (ctx) {
+    var random = Math.random();
+    var speed = (random > 0.7 ? 0.7 : random > 0.5 ? 0.5 : 0.3) * 5;
+    var position = new Vec2_1.Vec2(Math.floor(Math.random() * ctx.canvas.width), 0);
+
+    if (Math.round(Math.random() * 5) === 1) {
+      this.stars.push(new Star(position, speed));
+    }
+  };
+
+  Background.prototype.draw = function (ctx) {
+    ctx.fillStyle = this.color;
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    this.drawStars(ctx);
+    this.stars.map(function (star) {
+      star.draw(ctx);
+    });
+  };
+
+  Background.prototype.update = function () {
+    this.stars.map(function (star) {
+      star.update();
+    });
+    this.stars = this.stars.filter(function (star) {
+      return star.active;
+    });
+  };
+
+  return Background;
+}();
+
+exports.default = Background;
+},{"../helpers":"helpers/index.ts","./Vec2":"modules/Vec2.ts"}],"modules/GameObject.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -151,10 +268,10 @@ Object.defineProperty(exports, "__esModule", {
 
 var Vec2_1 = require("./Vec2");
 
-var Person =
+var GameObject =
 /** @class */
 function () {
-  function Person(ctx, pos, imageSrc, size) {
+  function GameObject(ctx, pos, imageSrc, size) {
     if (size === void 0) {
       size = new Vec2_1.Vec2(16, 16);
     }
@@ -164,7 +281,6 @@ function () {
     this.imageSrc = imageSrc;
     this.size = size;
     this.canvas = ctx.canvas;
-    this.age = Math.floor(Math.random() * 128);
     this.image = new Image();
     this.image.src = imageSrc;
     this.pos = new Vec2_1.Vec2(pos.x, pos.y);
@@ -172,29 +288,27 @@ function () {
     console.log(imageSrc);
   }
 
-  Person.prototype.isBounds = function () {
+  GameObject.prototype.isBounds = function () {
     return this.pos.x >= 0 && this.pos.x <= this.canvas.width && this.pos.y >= 0 && this.pos.y <= this.canvas.height;
   };
 
-  Person.prototype.draw = function (ctx) {
-    // this.ctx.fillStyle = 'green'
-    // this.ctx.fillRect(this.pos.x, this.pos.y, 32, 32)
+  GameObject.prototype.draw = function (ctx) {
     ctx.drawImage(this.image, this.pos.x, this.pos.y, this.size.x, this.size.y);
   };
 
-  Person.prototype.explode = function () {
+  GameObject.prototype.explode = function () {
     this.active = false;
   };
 
-  Person.prototype.update = function () {
+  GameObject.prototype.update = function () {
     this.pos.x += this.vel.x;
     this.pos.y += this.vel.y / 2;
   };
 
-  return Person;
+  return GameObject;
 }();
 
-exports.default = Person;
+exports.default = GameObject;
 },{"./Vec2":"modules/Vec2.ts"}],"modules/Bullet.ts":[function(require,module,exports) {
 "use strict";
 
@@ -269,7 +383,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var Person_1 = __importDefault(require("./Person"));
+var GameObject_1 = __importDefault(require("./GameObject"));
 
 var Bullet_1 = __importDefault(require("./Bullet"));
 
@@ -318,10 +432,10 @@ function (_super) {
   };
 
   return Player;
-}(Person_1.default);
+}(GameObject_1.default);
 
 exports.default = Player;
-},{"./Person":"modules/Person.ts","./Bullet":"modules/Bullet.ts","./Vec2":"modules/Vec2.ts"}],"modules/Screen.ts":[function(require,module,exports) {
+},{"./GameObject":"modules/GameObject.ts","./Bullet":"modules/Bullet.ts","./Vec2":"modules/Vec2.ts"}],"modules/Screen.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -397,7 +511,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var Person_1 = __importDefault(require("./Person"));
+var GameObject_1 = __importDefault(require("./GameObject"));
 
 var Vec2_1 = require("./Vec2");
 
@@ -411,6 +525,7 @@ function (_super) {
 
     _this.image = new Image();
     _this.image.src = imageSrc;
+    _this.age = Math.floor(Math.random() * 128);
     _this.pos.x = Math.round(ctx.canvas.width / 4 + Math.random() * ctx.canvas.width / 2);
     _this.vel = new Vec2_1.Vec2(0, 3);
     return _this;
@@ -429,10 +544,10 @@ function (_super) {
   };
 
   return Enemy;
-}(Person_1.default);
+}(GameObject_1.default);
 
 exports.default = Enemy;
-},{"./Person":"modules/Person.ts","./Vec2":"modules/Vec2.ts"}],"images/player.png":[function(require,module,exports) {
+},{"./GameObject":"modules/GameObject.ts","./Vec2":"modules/Vec2.ts"}],"images/player.png":[function(require,module,exports) {
 module.exports = "/player.0ed8be31.png";
 },{}],"images/enemy.png":[function(require,module,exports) {
 module.exports = "/enemy.7261e44d.png";
@@ -449,11 +564,15 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var Background_1 = __importDefault(require("./Background"));
+
 var Player_1 = __importDefault(require("./Player"));
 
 var Screen_1 = __importDefault(require("./Screen"));
 
 var Enemy_1 = __importDefault(require("./Enemy"));
+
+var helpers_1 = require("../helpers");
 
 var player_png_1 = __importDefault(require("../images/player.png"));
 
@@ -475,8 +594,8 @@ function () {
     this.ui.className = 'ui';
     this.initKeyboardController();
     this.enemies = [];
-    this.score = 0; // this.bg = new Background(this.ctx, this.config)
-
+    this.score = 0;
+    this.bg = new Background_1.default();
     this.player = new Player_1.default(this.screen.ctx, {
       x: this.screen.size.x / 2,
       y: this.screen.size.y - 48
@@ -490,7 +609,7 @@ function () {
       switch (event.keyCode) {
         case 87:
           // w
-          _this.player.vel.y = 8;
+          _this.player.pos.y -= 8;
           break;
 
         case 65:
@@ -527,10 +646,6 @@ function () {
     return a.pos.x < b.pos.x + b.size.x && a.pos.x + a.size.x > b.pos.x && a.pos.y < b.pos.y + b.size.y && a.pos.y + a.size.y > b.pos.y;
   };
 
-  Game.prototype.checkBoundsCollide = function (obj, boundBox) {
-    return obj.pos.x >= 0 && obj.pos.x <= boundBox.size.x && obj.pos.y >= 0 && obj.pos.y <= boundBox.size.y;
-  };
-
   Game.prototype.handleCollision = function () {
     var _this = this;
 
@@ -553,8 +668,8 @@ function () {
   };
 
   Game.prototype.draw = function (screen) {
-    screen.clear(); // this.bg.draw()
-
+    screen.clear();
+    this.bg.draw(screen.ctx);
     this.player.draw(screen.ctx);
     this.enemies.map(function (enemy) {
       enemy.draw(screen.ctx);
@@ -565,9 +680,7 @@ function () {
   };
 
   Game.prototype.update = function () {
-    var _this = this; // Screen collision
-
-
+    // Screen collision
     if (this.player.pos.x + this.player.size.x > this.screen.size.x) {
       this.player.pos.x = this.screen.size.x - this.player.size.x;
     }
@@ -587,7 +700,7 @@ function () {
     this.ui.textContent = this.score.toString();
     this.handleCollision();
     this.player.playerBullets.map(function (bullet) {
-      if (!_this.checkBoundsCollide(bullet, _this.screen)) {
+      if (!helpers_1.checkBoundsCollide(bullet)) {
         bullet.active = false;
       } else {
         bullet.update();
@@ -595,8 +708,8 @@ function () {
     });
     this.enemies.map(function (enemy) {
       return enemy.update();
-    }); // this.bg.update()
-
+    });
+    this.bg.update();
     this.enemies = this.enemies.filter(function (enemy) {
       return enemy.active;
     });
@@ -626,7 +739,7 @@ function () {
 }();
 
 exports.default = Game;
-},{"./Player":"modules/Player.ts","./Screen":"modules/Screen.ts","./Enemy":"modules/Enemy.ts","../images/player.png":"images/player.png","../images/enemy.png":"images/enemy.png"}],"index.ts":[function(require,module,exports) {
+},{"./Background":"modules/Background.ts","./Player":"modules/Player.ts","./Screen":"modules/Screen.ts","./Enemy":"modules/Enemy.ts","../helpers":"helpers/index.ts","../images/player.png":"images/player.png","../images/enemy.png":"images/enemy.png"}],"index.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -641,14 +754,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var Game_1 = __importDefault(require("./modules/Game"));
 
-var gameConfig = {
-  width: 255,
-  height: 240,
-  title: 'SpaceShooter'
-};
-var game = new Game_1.default(gameConfig);
+var config_json_1 = __importDefault(require("./config.json"));
+
+var game = new Game_1.default(config_json_1.default);
 game.init();
-},{"./modules/Game":"modules/Game.ts"}],"../../../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./modules/Game":"modules/Game.ts","./config.json":"config.json"}],"../../../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
