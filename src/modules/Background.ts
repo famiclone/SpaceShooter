@@ -1,5 +1,4 @@
 import { checkBoundsCollide } from '../helpers'
-import GameObject from './GameObject'
 import { Vec2 } from './Vec2'
 
 class Star {
@@ -7,15 +6,18 @@ class Star {
   vel: Vec2
   color: string
 
-  constructor(public pos: Vec2, public speed: number = 1) {
+  constructor(public pos: Vec2, public speed: number = 1, public size) {
     this.active = true
     this.vel = new Vec2(0, 1)
-    this.color = `rgba(255, 255, 255, ${this.speed / 5})`
+    this.color = `rgba(255, 255, 255, ${this.speed / 2})`
   }
 
   draw(ctx) {
     ctx.fillStyle = this.color
-    ctx.fillRect(this.pos.x, this.pos.y, 3, 3)
+    const circle = new Path2D()
+    circle.arc(this.pos.x, this.pos.y, this.size.x, 0, 2 * Math.PI)
+
+    ctx.fill(circle)
   }
 
   update() {
@@ -33,12 +35,13 @@ export default class Background {
   }
 
   drawStars(ctx) {
-    const random = Math.random()
-    const speed = (random > 0.7 ? 0.7 : random > 0.5 ? 0.5 : 0.3) * 5
+    const random = Math.floor(Math.random() * Math.floor(10))
+    const speed = random
+    const size = new Vec2(2 / speed, 5 / speed)
     const position = new Vec2(Math.floor(Math.random() * ctx.canvas.width), 0)
 
     if (Math.round(Math.random() * 5) === 1) {
-      this.stars.push(new Star(position, speed))
+      this.stars.push(new Star(position, speed, size))
     }
   }
 
