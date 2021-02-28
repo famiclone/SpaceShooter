@@ -275,21 +275,19 @@ var Vec2_1 = require("./Vec2");
 var GameObject =
 /** @class */
 function () {
-  function GameObject(ctx, pos, imageSrc, size) {
+  function GameObject(ctx, pos, sprite, size) {
     if (size === void 0) {
       size = new Vec2_1.Vec2(16, 16);
     }
 
     this.ctx = ctx;
     this.pos = pos;
-    this.imageSrc = imageSrc;
+    this.sprite = sprite;
     this.size = size;
     this.canvas = ctx.canvas;
     this.image = new Image();
-    this.image.src = imageSrc;
     this.pos = new Vec2_1.Vec2(pos.x, pos.y);
     this.active = true;
-    console.log(imageSrc);
   }
 
   GameObject.prototype.isBounds = function () {
@@ -297,7 +295,7 @@ function () {
   };
 
   GameObject.prototype.draw = function (ctx) {
-    ctx.drawImage(this.image, this.pos.x, this.pos.y, this.size.x, this.size.y);
+    ctx.drawImage(this.sprite, this.pos.x, this.pos.y);
   };
 
   GameObject.prototype.explode = function () {
@@ -398,19 +396,16 @@ var Player =
 function (_super) {
   __extends(Player, _super);
 
-  function Player(ctx, pos, imageSrc) {
+  function Player(ctx, pos, sprite) {
     if (pos === void 0) {
       pos = new Vec2_1.Vec2(0, 0);
     }
 
-    var _this = _super.call(this, ctx, pos, imageSrc, new Vec2_1.Vec2(16, 16)) || this;
+    var _this = _super.call(this, ctx, pos, sprite, new Vec2_1.Vec2(16, 16)) || this;
 
     _this.ctx = ctx;
     _this.pos = pos;
-    _this.imageSrc = imageSrc;
-    _this.color = 'blue';
-    _this.width = 21;
-    _this.height = 21;
+    _this.sprite = sprite;
     _this.active = true;
     _this.playerBullets = [];
     _this.vel = new Vec2_1.Vec2(0, 0);
@@ -532,11 +527,9 @@ var Enemy =
 function (_super) {
   __extends(Enemy, _super);
 
-  function Enemy(ctx, pos, imageSrc) {
-    var _this = _super.call(this, ctx, pos, imageSrc, new Vec2_1.Vec2(16, 16)) || this;
+  function Enemy(ctx, pos, sprite) {
+    var _this = _super.call(this, ctx, pos, sprite, new Vec2_1.Vec2(16, 16)) || this;
 
-    _this.image = new Image();
-    _this.image.src = imageSrc;
     _this.age = Math.floor(Math.random() * 128);
     _this.pos.x = Math.round(ctx.canvas.width / 4 + Math.random() * ctx.canvas.width / 2);
     _this.vel = new Vec2_1.Vec2(0, 3);
@@ -559,11 +552,58 @@ function (_super) {
 }(GameObject_1.default);
 
 exports.default = Enemy;
-},{"./GameObject":"modules/GameObject.ts","./Vec2":"modules/Vec2.ts"}],"images/player.png":[function(require,module,exports) {
-module.exports = "/player.0ed8be31.png";
-},{}],"images/enemy.png":[function(require,module,exports) {
-module.exports = "/enemy.7261e44d.png";
-},{}],"modules/Game.ts":[function(require,module,exports) {
+},{"./GameObject":"modules/GameObject.ts","./Vec2":"modules/Vec2.ts"}],"images/spritesheet.png":[function(require,module,exports) {
+module.exports = "/spritesheet.ed2d5e51.png";
+},{}],"images/spritesheet.json":[function(require,module,exports) {
+module.exports = {
+  "player": [0, 0],
+  "enemy": [16, 0]
+};
+},{}],"modules/Sprite.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Sprite = void 0;
+
+var Vec2_1 = require("./Vec2");
+
+var Sprite =
+/** @class */
+function () {
+  function Sprite(image, name, spritesheet, size) {
+    if (size === void 0) {
+      size = new Vec2_1.Vec2(8, 8);
+    }
+
+    this.image = image;
+    this.name = name;
+    this.spritesheet = spritesheet;
+    this.size = size;
+    this.canvas = document.createElement('canvas'); // Set canvas size
+
+    this.canvas.width = this.size.x;
+    this.canvas.height = this.size.y; // Get context
+
+    this.ctx = this.canvas.getContext('2d');
+    var pos = this.getPosition(); // Draw image on the canvas
+
+    this.ctx.drawImage(this.image, pos.x, pos.y, this.size.x, this.size.y, 0, 0, this.size.x, this.size.y);
+    this.sprite = new Image();
+    this.sprite.src = this.canvas.toDataURL();
+  }
+
+  Sprite.prototype.getPosition = function () {
+    var el = this.spritesheet[this.name] || [0, 0];
+    return new Vec2_1.Vec2(el[0], el[1]);
+  };
+
+  return Sprite;
+}();
+
+exports.Sprite = Sprite;
+},{"./Vec2":"modules/Vec2.ts"}],"modules/Game.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -586,11 +626,13 @@ var Enemy_1 = __importDefault(require("./Enemy"));
 
 var helpers_1 = require("../helpers");
 
-var player_png_1 = __importDefault(require("../images/player.png"));
+var spritesheet_png_1 = __importDefault(require("../images/spritesheet.png"));
 
-var enemy_png_1 = __importDefault(require("../images/enemy.png"));
+var spritesheet_json_1 = __importDefault(require("../images/spritesheet.json"));
 
 var Vec2_1 = require("./Vec2");
+
+var Sprite_1 = require("./Sprite");
 
 var level = {};
 
@@ -598,6 +640,8 @@ var Game =
 /** @class */
 function () {
   function Game(config) {
+    var _this = this;
+
     this.config = config;
     this.level = level;
     this.ui = document.createElement('div');
@@ -607,7 +651,18 @@ function () {
     this.enemies = [];
     this.score = 0;
     this.bg = new Background_1.default();
-    this.player = new Player_1.default(this.screen.ctx, new Vec2_1.Vec2(this.screen.size.x / 2, this.screen.size.y - 48), player_png_1.default);
+    this.sprite = new Image();
+    this.sprite.src = spritesheet_png_1.default;
+    this.player = null;
+    this.loaded = false;
+
+    this.sprite.onload = function () {
+      // Sprite loaded
+      _this.loaded = true;
+      _this.player = new Player_1.default(_this.screen.ctx, new Vec2_1.Vec2(_this.screen.size.x / 2, _this.screen.size.y - 48), new Sprite_1.Sprite(_this.sprite, 'player', spritesheet_json_1.default, new Vec2_1.Vec2(16, 16)).sprite);
+    }; // this.font = new Sprite(font, 'b', fontsheet)
+    // this.fontRenderer = new FontRenderer(font, fontsheet)
+
   }
 
   Game.prototype.initKeyboardController = function () {
@@ -675,7 +730,8 @@ function () {
   };
 
   Game.prototype.draw = function (screen) {
-    screen.clear();
+    screen.clear(); // this.fontRenderer.drawText(screen.ctx, 'A')
+
     this.bg.draw(screen.ctx);
     this.player.draw(screen.ctx);
     this.enemies.map(function (enemy) {
@@ -728,15 +784,18 @@ function () {
       this.enemies.push(new Enemy_1.default(this.screen.ctx, {
         x: 0,
         y: 0
-      }, enemy_png_1.default));
+      }, new Sprite_1.Sprite(this.sprite, 'enemy', spritesheet_json_1.default, new Vec2_1.Vec2(16, 16)).sprite));
     }
   };
 
   Game.prototype.run = function () {
     var _this = this;
 
-    this.draw(this.screen);
-    this.update();
+    if (this.loaded) {
+      this.draw(this.screen);
+      this.update();
+    }
+
     requestAnimationFrame(function () {
       return _this.run();
     });
@@ -746,7 +805,7 @@ function () {
 }();
 
 exports.default = Game;
-},{"./Background":"modules/Background.ts","./Player":"modules/Player.ts","./Screen":"modules/Screen.ts","./Enemy":"modules/Enemy.ts","../helpers":"helpers/index.ts","../images/player.png":"images/player.png","../images/enemy.png":"images/enemy.png","./Vec2":"modules/Vec2.ts"}],"index.ts":[function(require,module,exports) {
+},{"./Background":"modules/Background.ts","./Player":"modules/Player.ts","./Screen":"modules/Screen.ts","./Enemy":"modules/Enemy.ts","../helpers":"helpers/index.ts","../images/spritesheet.png":"images/spritesheet.png","../images/spritesheet.json":"images/spritesheet.json","./Vec2":"modules/Vec2.ts","./Sprite":"modules/Sprite.ts"}],"index.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -793,7 +852,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61578" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55202" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

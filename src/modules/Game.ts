@@ -3,12 +3,18 @@ import Player from './Player'
 import UI from './UI'
 import Screen from './Screen'
 import Enemy from './Enemy'
+import FontRenderer from './FontRenderer'
 import { GameConfigProps } from '../types'
 import { checkBoundsCollide } from '../helpers'
 
-import playerSrc from '../images/player.png'
-import enemySrc from '../images/enemy.png'
+import font from '../images/font.png'
+import fontsheet from '../images/font.json'
+
+import sprite from '../images/spritesheet.png'
+import spritejson from '../images/spritesheet.json'
+
 import { Vec2 } from './Vec2'
+import { Sprite } from './Sprite'
 
 const level = {}
 
@@ -20,6 +26,8 @@ export default class Game {
   score: number
   bg: any
   player: Player
+  fontRenderer: FontRenderer
+  sprite: HTMLImageElement
 
   constructor(private config: GameConfigProps) {
     this.level = level
@@ -30,11 +38,27 @@ export default class Game {
     this.enemies = []
     this.score = 0
     this.bg = new Background()
-    this.player = new Player(
-      this.screen.ctx,
-      new Vec2(this.screen.size.x / 2, this.screen.size.y - 48),
-      playerSrc
-    )
+
+    this.sprite = new Image()
+    this.sprite.src = sprite
+
+    this.player = null
+
+    this.loaded = false
+
+    this.sprite.onload = () => {
+      // Sprite loaded
+      this.loaded = true
+
+      this.player = new Player(
+        this.screen.ctx,
+        new Vec2(this.screen.size.x / 2, this.screen.size.y - 48),
+        new Sprite(this.sprite, 'player', spritejson, new Vec2(16, 16)).sprite
+      )
+    }
+
+    // this.font = new Sprite(font, 'b', fontsheet)
+    // this.fontRenderer = new FontRenderer(font, fontsheet)
   }
 
   initKeyboardController() {
@@ -99,6 +123,8 @@ export default class Game {
 
   draw(screen) {
     screen.clear()
+
+    // this.fontRenderer.drawText(screen.ctx, 'A')
     this.bg.draw(screen.ctx)
     this.player.draw(screen.ctx)
 
@@ -148,13 +174,21 @@ export default class Game {
     )
 
     if (Math.round(Math.random() * 90) == 1) {
-      this.enemies.push(new Enemy(this.screen.ctx, { x: 0, y: 0 }, enemySrc))
+      this.enemies.push(
+        new Enemy(
+          this.screen.ctx,
+          { x: 0, y: 0 },
+          new Sprite(this.sprite, 'enemy', spritejson, new Vec2(16, 16)).sprite
+        )
+      )
     }
   }
 
   run() {
-    this.draw(this.screen)
-    this.update()
+    if (this.loaded) {
+      this.draw(this.screen)
+      this.update()
+    }
 
     requestAnimationFrame(() => this.run())
   }

@@ -1,6 +1,8 @@
 import GameObject from './GameObject'
 import Bullet from './Bullet'
 import { Vec2 } from './Vec2'
+import { SpriteProps } from '../types'
+import { Sprite } from './Sprite'
 
 class Player extends GameObject {
   color: string
@@ -10,11 +12,12 @@ class Player extends GameObject {
   playerBullets: any[]
   vel: Vec2
 
-  constructor(public ctx: CanvasRenderingContext2D, public pos: Vec2 = new Vec2(0, 0), public imageSrc: string) {
-    super(ctx, pos, imageSrc, new Vec2(16, 16))
-    this.color = 'blue'
-    this.width = 21
-    this.height = 21
+  constructor(
+    public ctx: CanvasRenderingContext2D,
+    public pos: Vec2 = new Vec2(0, 0),
+    public sprite: Sprite
+  ) {
+    super(ctx, pos, sprite, new Vec2(16, 16))
     this.active = true
     this.playerBullets = []
     this.vel = new Vec2(0, 0)

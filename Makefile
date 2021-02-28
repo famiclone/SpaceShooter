@@ -1,8 +1,14 @@
-run:
-	npx parcel ./src/index.html
+run: parcel-clean
+	npx parcel --no-cache ./src/index.html
 
-clean:
-	git rm -r --cached . && rm -rf ./dist .cache
+parcel-clean:
+	rm -rf ./dist .cache
+
+git-clean:
+	git rm -r --cached .
+
+clean: parcel-clean git-clean
+	echo "✅ Cleaned"
 
 build: clean
 	npx parcel build --public-url '/SpaceShooter' ./src/index.html

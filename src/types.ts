@@ -1,3 +1,5 @@
+import { Vec2 } from './modules/Vec2'
+
 export interface SizeProps {
   width: number
   height: number
@@ -32,4 +34,9 @@ export interface PersonProps {
 export interface ScreenProps {
   mount(): void
   clear(): void
+}
+
+export interface SpriteProps {
+  src: string
+  pos: Vec2
 }
