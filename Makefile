@@ -7,11 +7,11 @@ parcel-clean:
 git-clean:
 	git rm -r --cached .
 
-clean: parcel-clean git-clean
+clean: parcel-clean
 	echo "✅ Cleaned"
 
 build: clean
-	npx parcel build --public-url '/SpaceShooter' ./src/index.html
+	npx parcel build --no-cache --public-url '/SpaceShooter' ./src/index.html
 
 deploy: build
 	git subtree push --prefix="dist"  origin gh-pages
