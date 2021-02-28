@@ -10,7 +10,7 @@ class Player extends GameObject {
   playerBullets: any[]
   vel: Vec2
 
-  constructor(public ctx: CanvasRenderingContext2D, public pos: Vec2, public imageSrc: string) {
+  constructor(public ctx: CanvasRenderingContext2D, public pos: Vec2 = new Vec2(0, 0), public imageSrc: string) {
     super(ctx, pos, imageSrc, new Vec2(16, 16))
     this.color = 'blue'
     this.width = 21

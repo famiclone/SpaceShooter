@@ -8,6 +8,7 @@ import { checkBoundsCollide } from '../helpers'
 
 import playerSrc from '../images/player.png'
 import enemySrc from '../images/enemy.png'
+import { Vec2 } from './Vec2'
 
 const level = {}
 
@@ -23,31 +24,39 @@ export default class Game {
   constructor(private config: GameConfigProps) {
     this.level = level
     this.ui = document.createElement('div')
-    this.screen = new Screen({ x: config.width, y: config.height })
+    this.screen = new Screen(new Vec2(config.width, config.height))
     this.ui.className = 'ui'
     this.initKeyboardController()
     this.enemies = []
     this.score = 0
     this.bg = new Background()
-    this.player = new Player(this.screen.ctx, { x: this.screen.size.x / 2, y: this.screen.size.y - 48 }, playerSrc)
+    this.player = new Player(
+      this.screen.ctx,
+      new Vec2(this.screen.size.x / 2, this.screen.size.y - 48),
+      playerSrc
+    )
   }
 
   initKeyboardController() {
     document.addEventListener('keydown', (event) => {
-      switch (event.keyCode) {
-        case 87: // w
+      switch (event.code) {
+        case 'KeyW':
+        case 'ArrowUp':
           this.player.pos.y -= 8
           break
-        case 65: // a
+        case 'KeyA':
+        case 'ArrowLeft':
           this.player.pos.x -= 8
           break
-        case 83: // s
+        case 'KeyS':
+        case 'ArrowDown':
           this.player.pos.y += 8
           break
-        case 68: // d
+        case 'KeyD':
+        case 'ArrowRight':
           this.player.pos.x += 8
           break
-        case 32: // space
+        case 'Space':
           this.player.shoot()
           break
       }
@@ -134,7 +143,9 @@ export default class Game {
     this.bg.update()
 
     this.enemies = this.enemies.filter((enemy) => enemy.active)
-    this.player.playerBullets = this.player.playerBullets.filter((bullet) => bullet.active)
+    this.player.playerBullets = this.player.playerBullets.filter(
+      (bullet) => bullet.active
+    )
 
     if (Math.round(Math.random() * 90) == 1) {
       this.enemies.push(new Enemy(this.screen.ctx, { x: 0, y: 0 }, enemySrc))
