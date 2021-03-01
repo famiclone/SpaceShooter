@@ -552,86 +552,51 @@ function (_super) {
 }(GameObject_1.default);
 
 exports.default = Enemy;
-},{"./GameObject":"modules/GameObject.ts","./Vec2":"modules/Vec2.ts"}],"modules/Sprite.ts":[function(require,module,exports) {
+},{"./GameObject":"modules/GameObject.ts","./Vec2":"modules/Vec2.ts"}],"modules/FontRenderer.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.Sprite = void 0;
-
-var Vec2_1 = require("./Vec2");
-
-var Sprite =
-/** @class */
-function () {
-  function Sprite(image, name, spritesheet, size) {
-    if (size === void 0) {
-      size = new Vec2_1.Vec2(8, 8);
-    }
-
-    this.image = image;
-    this.name = name;
-    this.spritesheet = spritesheet;
-    this.size = size;
-    this.canvas = document.createElement('canvas'); // Set canvas size
-
-    this.canvas.width = this.size.x;
-    this.canvas.height = this.size.y; // Get context
-
-    this.ctx = this.canvas.getContext('2d');
-    var pos = this.getPosition(); // Draw image on the canvas
-
-    this.ctx.drawImage(this.image, pos.x, pos.y, this.size.x, this.size.y, 0, 0, this.size.x, this.size.y);
-    this.sprite = new Image();
-    this.sprite.src = this.canvas.toDataURL();
-  }
-
-  Sprite.prototype.getPosition = function () {
-    var el = this.spritesheet[this.name] || [0, 0];
-    return new Vec2_1.Vec2(el[0], el[1]);
-  };
-
-  return Sprite;
-}();
-
-exports.Sprite = Sprite;
-},{"./Vec2":"modules/Vec2.ts"}],"modules/FontRenderer.ts":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var Sprite_1 = require("./Sprite");
 
 var Vec2_1 = require("./Vec2");
 
 var FontRenderer =
 /** @class */
 function () {
-  function FontRenderer(font, fontsheet, size) {
+  function FontRenderer(font, fontsheet, position, size) {
+    if (position === void 0) {
+      position = new Vec2_1.Vec2(0, 0);
+    }
+
     if (size === void 0) {
       size = new Vec2_1.Vec2(8, 8);
     }
 
     this.font = font;
     this.fontsheet = fontsheet;
+    this.position = position;
     this.size = size;
   }
 
-  FontRenderer.prototype.drawText = function (ctx, message, pos) {
+  FontRenderer.prototype.getPosition = function (name) {
+    var el = this.fontsheet[name] || [0, 0];
+    return new Vec2_1.Vec2(el[0], el[1]);
+  };
+
+  FontRenderer.prototype.drawText = function (ctx, message, position) {
     var _this = this;
 
-    if (pos === void 0) {
-      pos = new Vec2_1.Vec2(0, 0);
+    if (position === void 0) {
+      position = new Vec2_1.Vec2(0, 0);
     }
 
     var xOffset = 0;
     var yOffset = 0;
     message.split('').forEach(function (char) {
-      var sprite = new Sprite_1.Sprite(_this.font, char, _this.fontsheet, new Vec2_1.Vec2(8, 8));
-      ctx.drawImage(sprite.sprite, pos.x + xOffset, pos.y);
+      var pos = _this.getPosition(char);
+
+      ctx.drawImage(_this.font, pos.x, pos.y, _this.size.x, _this.size.y, position.x + _this.position.x + xOffset, position.y + _this.position.y, _this.size.x, _this.size.y);
       xOffset += _this.size.x;
     });
   };
@@ -640,7 +605,7 @@ function () {
 }();
 
 exports.default = FontRenderer;
-},{"./Sprite":"modules/Sprite.ts","./Vec2":"modules/Vec2.ts"}],"images/font.png":[function(require,module,exports) {
+},{"./Vec2":"modules/Vec2.ts"}],"images/font.png":[function(require,module,exports) {
 module.exports = "/font.6c31cbe7.png";
 },{}],"images/font.json":[function(require,module,exports) {
 module.exports = {
@@ -664,12 +629,12 @@ module.exports = {
   "R": [16, 8],
   "S": [24, 8],
   "T": [32, 8],
-  "U": [40, 0],
-  "V": [48, 0],
-  "W": [56, 0],
-  "X": [80, 0],
-  "Y": [80, 0],
-  "Z": [80, 0],
+  "U": [40, 8],
+  "V": [48, 8],
+  "W": [56, 8],
+  "X": [80, 8],
+  "Y": [80, 8],
+  "Z": [80, 8],
   "0": [0, 16],
   "1": [8, 16],
   "2": [16, 16],
@@ -688,7 +653,51 @@ module.exports = {
   "player": [0, 0],
   "enemy": [16, 0]
 };
-},{}],"modules/Game.ts":[function(require,module,exports) {
+},{}],"modules/Sprite.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Sprite = void 0;
+
+var Vec2_1 = require("./Vec2");
+
+var Sprite =
+/** @class */
+function () {
+  // sprite: HTMLImageElement
+  function Sprite(image, name, spritesheet, size) {
+    if (size === void 0) {
+      size = new Vec2_1.Vec2(16, 16);
+    }
+
+    this.image = image;
+    this.name = name;
+    this.spritesheet = spritesheet;
+    this.size = size;
+    this.canvas = document.createElement('canvas'); // Set canvas size
+
+    this.canvas.width = this.size.x;
+    this.canvas.height = this.size.y; // Get context
+
+    this.ctx = this.canvas.getContext('2d');
+    var pos = this.getPosition(); // Draw image on the canvas
+
+    this.ctx.drawImage(this.image, pos.x, pos.y, this.size.x, this.size.y, 0, 0, this.size.x, this.size.y);
+    this.sprite = this.canvas;
+  }
+
+  Sprite.prototype.getPosition = function () {
+    var el = this.spritesheet[this.name] || [0, 0];
+    return new Vec2_1.Vec2(el[0], el[1]);
+  };
+
+  return Sprite;
+}();
+
+exports.Sprite = Sprite;
+},{"./Vec2":"modules/Vec2.ts"}],"modules/Game.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -726,6 +735,12 @@ var Vec2_1 = require("./Vec2");
 var Sprite_1 = require("./Sprite");
 
 var level = {};
+
+var interval = function interval(cb) {
+  return setInterval(cb, 1000);
+};
+
+var count = 0;
 
 var Game =
 /** @class */
@@ -840,11 +855,8 @@ function () {
     });
     this.player.playerBullets.map(function (bullet) {
       bullet.draw(screen.ctx);
-    }); // this.fontRenderer.drawText(
-    //   screen.ctx,
-    //   `SCORE ${this.score.toString()}`,
-    //   new Vec2(32, 32)
-    // )
+    });
+    this.fontRenderer.drawText(screen.ctx, "SCORE " + this.score.toString(), new Vec2_1.Vec2(8, 8));
   };
 
   Game.prototype.update = function () {
@@ -957,7 +969,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61832" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63922" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

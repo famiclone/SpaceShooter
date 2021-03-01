@@ -18,6 +18,9 @@ import { Sprite } from './Sprite'
 
 const level = {}
 
+const interval = (cb) => setInterval(cb, 1000)
+const count = 0
+
 export default class Game {
   screen: Screen
   level: any
@@ -150,11 +153,11 @@ export default class Game {
     this.player.playerBullets.map((bullet) => {
       bullet.draw(screen.ctx)
     })
-    // this.fontRenderer.drawText(
-    //   screen.ctx,
-    //   `SCORE ${this.score.toString()}`,
-    //   new Vec2(32, 32)
-    // )
+    this.fontRenderer.drawText(
+      screen.ctx,
+      `SCORE ${this.score.toString()}`,
+      new Vec2(8, 8)
+    )
   }
 
   update() {

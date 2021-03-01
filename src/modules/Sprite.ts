@@ -4,13 +4,13 @@ export class Sprite {
   img: HTMLImageElement
   canvas: HTMLCanvasElement
   ctx: CanvasRenderingContext2D
-  sprite: HTMLImageElement
+  // sprite: HTMLImageElement
 
   constructor(
     public image,
     public name,
     public spritesheet,
-    public size: Vec2 = new Vec2(8, 8)
+    public size: Vec2 = new Vec2(16, 16)
   ) {
     this.canvas = document.createElement('canvas')
 
@@ -34,8 +34,8 @@ export class Sprite {
       this.size.x,
       this.size.y
     )
-    this.sprite = new Image()
-    this.sprite.src = this.canvas.toDataURL()
+
+    this.sprite = this.canvas
   }
 
   private getPosition() {

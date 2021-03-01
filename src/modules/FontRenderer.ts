@@ -7,17 +7,32 @@ export default class FontRenderer {
   constructor(
     public font: HTMLImageElement,
     public fontsheet: any,
+    public position: Vec2 = new Vec2(0, 0),
     public size: Vec2 = new Vec2(8, 8)
   ) {}
 
-  drawText(ctx, message, pos: Vec2 = new Vec2(0, 0)) {
+  private getPosition(name) {
+    const el = this.fontsheet[name] || [0, 0]
+    return new Vec2(el[0], el[1])
+  }
+
+  drawText(ctx, message, position: Vec2 = new Vec2(0, 0)) {
     let xOffset: number = 0
     let yOffset: number = 0
 
     message.split('').forEach((char: string) => {
-      const sprite = new Sprite(this.font, char, this.fontsheet, new Vec2(8, 8))
-
-      ctx.drawImage(sprite.sprite, pos.x + xOffset, pos.y)
+      const pos = this.getPosition(char)
+      ctx.drawImage(
+        this.font,
+        pos.x,
+        pos.y,
+        this.size.x,
+        this.size.y,
+        position.x + this.position.x + xOffset,
+        position.y + this.position.y,
+        this.size.x,
+        this.size.y
+      )
       xOffset += this.size.x
     })
   }

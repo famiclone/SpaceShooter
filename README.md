@@ -11,18 +11,16 @@
       /____/_/ /_/\____/\____/\__/\___/_/
 ```
 
-## DONE
-
-- Load and draw image from file
-- Score increment
-- Collision
-- One type of enemy
-- Enemy moves to player's direction
-- Animated background
-
 ## TODO
 
-- [ ] Bitmap font renderer
+- [x] Load and draw image from file
+- [x] Score increment
+- [x] Collision
+- [x] One type of enemy
+- [x] Enemy moves to player's direction
+- [x] Animated background
+- [x] Bitmap font renderer
+- [x] Load sprites from spritesheet
 - [ ] Start screen
 - [ ] Menu
 - [ ] Animations
@@ -30,4 +28,3 @@
 - [ ] Game over
 - [ ] Smooth player moving
 - [ ] Load and draw background map
-- [x] Load sprites from spritesheet
