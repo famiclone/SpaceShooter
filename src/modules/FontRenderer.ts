@@ -4,14 +4,21 @@ import { Vec2 } from './Vec2'
 export default class FontRenderer {
   image: HTMLImageElement
 
-  constructor(public fontSrc: string, public fontsheet: any) {
-    this.image = new Image()
-    this.image.src = fontSrc
-  }
+  constructor(
+    public font: HTMLImageElement,
+    public fontsheet: any,
+    public size: Vec2 = new Vec2(8, 8)
+  ) {}
 
   drawText(ctx, message, pos: Vec2 = new Vec2(0, 0)) {
-    const letter = new Sprite(this.image, message[0], this.fontsheet)
+    let xOffset: number = 0
+    let yOffset: number = 0
 
-    ctx.drawImage(letter.image, pos.x, pos.y)
+    message.split('').forEach((char: string) => {
+      const sprite = new Sprite(this.font, char, this.fontsheet, new Vec2(8, 8))
+
+      ctx.drawImage(sprite.sprite, pos.x + xOffset, pos.y)
+      xOffset += this.size.x
+    })
   }
 }

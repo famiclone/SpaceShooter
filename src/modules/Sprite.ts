@@ -23,7 +23,6 @@ export class Sprite {
 
     const pos = this.getPosition()
     // Draw image on the canvas
-
     this.ctx.drawImage(
       this.image,
       pos.x,

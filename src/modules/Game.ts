@@ -28,11 +28,12 @@ export default class Game {
   player: Player
   fontRenderer: FontRenderer
   sprite: HTMLImageElement
+  loaded: number
 
   constructor(private config: GameConfigProps) {
     this.level = level
     this.ui = document.createElement('div')
-    this.screen = new Screen(new Vec2(config.width, config.height))
+    this.screen = new Screen(new Vec2(this.config.width, this.config.height))
     this.ui.className = 'ui'
     this.initKeyboardController()
     this.enemies = []
@@ -42,13 +43,28 @@ export default class Game {
     this.sprite = new Image()
     this.sprite.src = sprite
 
-    this.player = null
+    this.font = new Image()
+    this.font.src = font
 
-    this.loaded = false
+    this.loaded = 0
+
+    this.player = null
+    this.fontRenderer = null
 
     this.sprite.onload = () => {
       // Sprite loaded
-      this.loaded = true
+      this.loaded++
+
+      this.font.onload = () => {
+        // Font loaded
+        this.loaded++
+
+        this.fontRenderer = new FontRenderer(
+          this.font,
+          fontsheet,
+          new Vec2(8, 8)
+        )
+      }
 
       this.player = new Player(
         this.screen.ctx,
@@ -57,8 +73,7 @@ export default class Game {
       )
     }
 
-    // this.font = new Sprite(font, 'b', fontsheet)
-    // this.fontRenderer = new FontRenderer(font, fontsheet)
+    console.log(this)
   }
 
   initKeyboardController() {
@@ -135,6 +150,11 @@ export default class Game {
     this.player.playerBullets.map((bullet) => {
       bullet.draw(screen.ctx)
     })
+    // this.fontRenderer.drawText(
+    //   screen.ctx,
+    //   `SCORE ${this.score.toString()}`,
+    //   new Vec2(32, 32)
+    // )
   }
 
   update() {
@@ -185,7 +205,7 @@ export default class Game {
   }
 
   run() {
-    if (this.loaded) {
+    if (this.loaded === 2) {
       this.draw(this.screen)
       this.update()
     }
