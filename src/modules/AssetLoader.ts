@@ -38,7 +38,7 @@ export class AssetLoader {
       },
       false
     )
-    const name = src.split('.')[0].replace('/', '')
+    const name = src.split('/').pop().split('.')[0]
     this[name] = image
   }
 
@@ -48,7 +48,7 @@ export class AssetLoader {
       const data: any = await response
       this.loadHandler(resolve)
 
-      const name = src.split('.')[0].replace('/', '')
+      const name = src.split('/').pop().split('.')[0]
       this[name] = data
     } catch (error) {}
   }
