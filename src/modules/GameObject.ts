@@ -1,22 +1,22 @@
 import { SpriteProps } from '../types'
 import { Sprite } from './Sprite'
-import { Vec2 } from './Vec2'
+import { Vec2D } from './Vec2D'
 
 export default class GameObject {
   active: boolean
   canvas: HTMLCanvasElement
   image: HTMLImageElement
-  vel: Vec2
+  vel: Vec2D
 
   constructor(
     public ctx: CanvasRenderingContext2D,
-    public pos: Vec2,
+    public pos: Vec2D,
     public sprite: Sprite,
-    public size: Vec2 = new Vec2(16, 16)
+    public size: Vec2D = new Vec2D(16, 16)
   ) {
     this.canvas = ctx.canvas
     this.image = new Image()
-    this.pos = new Vec2(pos.x, pos.y)
+    this.pos = new Vec2D(pos.x, pos.y)
     this.active = true
   }
 

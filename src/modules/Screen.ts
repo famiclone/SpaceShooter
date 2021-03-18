@@ -1,11 +1,11 @@
 import { ScreenProps, SizeProps } from '../types'
-import { Vec2 } from './Vec2'
+import { Vec2D } from './Vec2D'
 
 export default class Screen implements ScreenProps {
   canvas: HTMLCanvasElement
   ctx: CanvasRenderingContext2D
 
-  constructor(public size: Vec2 = new Vec2(255, 240)) {
+  constructor(public size: Vec2D = new Vec2D(255, 240)) {
     this.canvas = document.createElement('canvas')
     this.ctx = this.canvas.getContext('2d')
     this.canvas.width = this.size.x

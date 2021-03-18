@@ -1,16 +1,16 @@
-import { Vec2 } from './Vec2'
+import { Vec2D } from './Vec2D'
 
 export default class Bullet {
   public active: boolean
-  pos: Vec2
-  size: Vec2
-  vel: Vec2
+  pos: Vec2D
+  size: Vec2D
+  vel: Vec2D
 
   constructor(x, y) {
     this.active = true
-    this.pos = new Vec2(x, y)
-    this.size = new Vec2(1, 3)
-    this.vel = new Vec2(0, -5)
+    this.pos = new Vec2D(x, y)
+    this.size = new Vec2D(1, 3)
+    this.vel = new Vec2D(0, -5)
   }
 
   draw(ctx) {

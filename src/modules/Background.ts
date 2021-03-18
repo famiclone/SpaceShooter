@@ -1,14 +1,14 @@
 import { checkBoundsCollide } from '../helpers'
-import { Vec2 } from './Vec2'
+import { Vec2D } from './Vec2D'
 
 class Star {
   public active: boolean
-  vel: Vec2
+  vel: Vec2D
   color: string
 
-  constructor(public pos: Vec2, public speed: number = 1, public size) {
+  constructor(public pos: Vec2D, public speed: number = 1, public size) {
     this.active = true
-    this.vel = new Vec2(0, 1)
+    this.vel = new Vec2D(0, 0)
     this.color = `rgba(255, 255, 255, ${this.speed / 2})`
   }
 
@@ -20,8 +20,9 @@ class Star {
     ctx.fill(circle)
   }
 
-  update() {
-    this.pos.y += this.vel.y * this.speed
+  update(vel) {
+    this.pos.y += vel.y * this.speed
+    this.pos.x += vel.x * this.speed
     this.active = this.active && checkBoundsCollide(this)
   }
 }
@@ -29,25 +30,43 @@ class Star {
 export default class Background {
   color: string
   stars: any[]
+  vel: Vec2D
   constructor() {
     this.color = 'black'
     this.stars = []
+    this.vel = new Vec2D(0, 0)
   }
 
   drawStars(ctx) {
     const random = Math.floor(Math.random() * Math.floor(10))
     const speed = random
-    const size = new Vec2(2 / speed, 5 / speed)
-    const position = new Vec2(Math.floor(Math.random() * ctx.canvas.width), 0)
+    const size = new Vec2D(2 / speed, 5 / speed)
 
-    if (Math.round(Math.random() * 5) === 1) {
+    if (this.stars.length < 50 && Math.round(Math.random() * 5) === 1) {
+      let position = new Vec2D(0, 0)
+
+      // Camera move down
+      if ((this.vel.y = -1)) {
+        position = new Vec2D(
+          Math.floor(Math.random() * ctx.canvas.width),
+          ctx.canvas.height
+        )
+      }
+      if ((this.vel.y = 1)) {
+        position = new Vec2D(Math.floor(Math.random() * ctx.canvas.width), 0)
+      }
+
       this.stars.push(new Star(position, speed, size))
     }
   }
 
+  stop(d) {
+    this.vel[d] = 0
+  }
+
   draw(ctx) {
-    ctx.fillStyle = this.color
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+    // ctx.fillStyle = this.color
+    // ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
     this.drawStars(ctx)
     this.stars.map((star) => {
@@ -57,7 +76,7 @@ export default class Background {
 
   update() {
     this.stars.map((star) => {
-      star.update()
+      star.update(this.vel)
     })
 
     this.stars = this.stars.filter((star) => star.active)

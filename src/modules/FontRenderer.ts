@@ -1,5 +1,5 @@
 import { Sprite } from './Sprite'
-import { Vec2 } from './Vec2'
+import { Vec2D } from './Vec2D'
 
 export default class FontRenderer {
   image: HTMLImageElement
@@ -7,16 +7,16 @@ export default class FontRenderer {
   constructor(
     public font: HTMLImageElement,
     public fontsheet: any,
-    public position: Vec2 = new Vec2(0, 0),
-    public size: Vec2 = new Vec2(8, 8)
+    public position: Vec2D = new Vec2D(0, 0),
+    public size: Vec2D = new Vec2D(8, 8)
   ) {}
 
   private getPosition(name) {
     const el = this.fontsheet[name] || [0, 0]
-    return new Vec2(el[0], el[1])
+    return new Vec2D(el[0], el[1])
   }
 
-  drawText(ctx, message, position: Vec2 = new Vec2(0, 0)) {
+  drawText(ctx, message, position: Vec2D = new Vec2D(0, 0)) {
     let xOffset: number = 0
     let yOffset: number = 0
 
