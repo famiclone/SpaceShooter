@@ -27,5 +27,5 @@
 - [ ] Health points
 - [ ] Game over
 - [ ] Smooth player moving
-- [ ] Load and draw background map
+- [x] Load and draw background map
 - [ ] Limit buffer canvas
