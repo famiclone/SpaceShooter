@@ -1,29 +1,27 @@
-import { Vec2D } from './Vec2D'
+import { Vec2D } from './Vec2D';
 
 export class Sprite {
-  img: HTMLImageElement
-  canvas: HTMLCanvasElement
-  ctx: CanvasRenderingContext2D
+  img: HTMLImageElement;
+  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
   // sprite: HTMLImageElement
 
   constructor(
     public image,
     public name,
     public spritesheet,
-    public size: Vec2D = new Vec2D(16, 16)
+    public size: Vec2D = new Vec2D(16, 16),
   ) {
-    this.canvas = document.createElement('canvas')
-
-    console.log(this.image)
+    this.canvas = document.createElement('canvas');
 
     // Set canvas size
-    this.canvas.width = this.size.x
-    this.canvas.height = this.size.y
+    this.canvas.width = this.size.x;
+    this.canvas.height = this.size.y;
 
     // Get context
-    this.ctx = this.canvas.getContext('2d')
+    this.ctx = this.canvas.getContext('2d');
 
-    const pos = this.getPosition()
+    const pos = this.getPosition();
     // Draw image on the canvas
     this.ctx.drawImage(
       this.image,
@@ -34,14 +32,14 @@ export class Sprite {
       0,
       0,
       this.size.x,
-      this.size.y
-    )
+      this.size.y,
+    );
 
-    this.sprite = this.canvas
+    this.sprite = this.canvas;
   }
 
   private getPosition() {
-    const el = this.spritesheet[this.name] || [0, 0]
-    return new Vec2D(el[0], el[1])
+    const el = this.spritesheet[this.name] || [0, 0];
+    return new Vec2D(el[0], el[1]);
   }
 }

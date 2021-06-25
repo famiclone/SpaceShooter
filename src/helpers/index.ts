@@ -1,16 +1,37 @@
-import config from '../config.json'
+import config from '../config.json';
 
 const screen = {
   size: {
     x: config.width,
-    y: config.height
-  }
-}
+    y: config.height,
+  },
+};
 
 export function checkBoundsCollide(obj, boundBox = screen) {
   return (
-    obj.pos.x >= 0 && obj.pos.x <= boundBox.size.x && obj.pos.y >= 0 && obj.pos.y <= boundBox.size.y
-  )
+    obj.pos.x >= 0 &&
+    obj.pos.x <= boundBox.size.x &&
+    obj.pos.y >= 0 &&
+    obj.pos.y <= boundBox.size.y
+  );
+}
+
+export function RGBAToHEX(r = 0, g = 0, b = 0, a = 1): string {
+  let rHex = r.toString(16);
+  let gHex = g.toString(16);
+  let bHex = b.toString(16);
+
+  if (rHex.length === 1) {
+    rHex = `0${r}`;
+  }
+  if (gHex.length === 1) {
+    gHex = `0${g}`;
+  }
+  if (bHex.length === 1) {
+    bHex = `0${b}`;
+  }
+
+  return `#${rHex}${gHex}${bHex}`;
 }
 
 // export const assets = {

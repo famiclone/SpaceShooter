@@ -17,8 +17,8 @@
     "url": "https://github.com/famiclone/SpaceShooter/issues"
   },
   "homepage": "https://github.com/famiclone/SpaceShooter#readme",
-  "dependencies": {},
   "devDependencies": {
+    "@parcel/transformer-image": "^2.0.0-beta.2",
     "@parcel/validator-typescript": "^2.0.0-alpha.3",
     "cssnano": "^4.1.10",
     "typescript": "^4.2.2"
