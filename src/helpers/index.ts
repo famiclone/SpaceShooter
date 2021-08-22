@@ -1,4 +1,4 @@
-import config from '../config.json';
+import { config } from '../config.js';
 
 const screen = {
   size: {
@@ -7,7 +7,7 @@ const screen = {
   },
 };
 
-export function checkBoundsCollide(obj, boundBox = screen) {
+export function checkBoundsCollide(obj: any, boundBox = screen) {
   return (
     obj.pos.x >= 0 &&
     obj.pos.x <= boundBox.size.x &&

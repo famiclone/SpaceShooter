@@ -1,8 +1,8 @@
 // @ts-nocheck
-import { Vec2D } from './Vec2D.js';
+import { Vector2D } from './Vector.js';
 export class Sprite {
     // sprite: HTMLImageElement
-    constructor(image, name, spritesheet, size = new Vec2D(16, 16)) {
+    constructor(image, name, spritesheet, size = new Vector2D(16, 16)) {
         this.image = image;
         this.name = name;
         this.spritesheet = spritesheet;
@@ -20,6 +20,6 @@ export class Sprite {
     }
     getPosition() {
         const el = this.spritesheet[this.name] || [0, 0];
-        return new Vec2D(el[0], el[1]);
+        return new Vector2D(el[0], el[1]);
     }
 }

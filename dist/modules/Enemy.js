@@ -1,7 +1,7 @@
 // @ts-nocheck
 // import { SpriteProps } from '../types';
 import GameObject from './GameObject.js';
-import { Vec2D } from './Vec2D.js';
+import { Vector2D } from './Vector.js';
 export var EnemyType;
 (function (EnemyType) {
     EnemyType[EnemyType["Zoraxx"] = 0] = "Zoraxx";
@@ -9,10 +9,10 @@ export var EnemyType;
 })(EnemyType || (EnemyType = {}));
 class Enemy extends GameObject {
     constructor(ctx, pos, sprite) {
-        super(ctx, pos, sprite, new Vec2D(16, 16));
+        super(ctx, pos, sprite, new Vector2D(16, 16));
         this.age = Math.floor(Math.random() * 128);
         this.pos.x = Math.round(ctx.canvas.width / 4 + (Math.random() * ctx.canvas.width) / 2);
-        this.vel = new Vec2D(0, 3);
+        this.vel = new Vector2D(0, 3);
     }
     explode() {
         this.active = false;

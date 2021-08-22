@@ -1,7 +1,8 @@
-import Game from './modules/Game'
-import { GameConfigProps, GameProps } from './types'
-import config from './config.json'
+// @ts-nocheck
 
-const game: Game = new Game(config)
+import Game from './modules/Game.js';
+import { config } from './config.js';
 
-game.init()
+const game: Game = new Game(config);
+
+game.init();

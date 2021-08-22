@@ -40,7 +40,7 @@ export class AssetLoader {
     async loadJson(src, resolve) {
         try {
             const response = await fetch(src);
-            const data = await response;
+            const data = await response.json();
             this.loadHandler(resolve);
             const name = src.split('/').pop().split('.')[0];
             this[name] = data;

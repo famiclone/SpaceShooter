@@ -1,11 +1,11 @@
 // @ts-nocheck
-import { Vec2D } from './Vec2D.js';
+import { Vector2D } from './Vector.js';
 export default class Bullet {
     constructor(x, y) {
         this.active = true;
-        this.pos = new Vec2D(x, y);
-        this.size = new Vec2D(1, 3);
-        this.vel = new Vec2D(0, -5);
+        this.pos = new Vector2D(x, y);
+        this.size = new Vector2D(1, 3);
+        this.vel = new Vector2D(0, -5);
     }
     draw(ctx) {
         ctx.fillStyle = 'orange';

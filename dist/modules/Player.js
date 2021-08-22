@@ -1,17 +1,17 @@
 // @ts-nocheck
 import GameObject from './GameObject.js';
 import Bullet from './Bullet.js';
-import { Vec2D } from './Vec2D.js';
+import { Vector2D } from './Vector.js';
 class Player extends GameObject {
-    constructor(ctx, pos = new Vec2D(0, 0), sprite, speed = 2) {
-        super(ctx, pos, sprite, new Vec2D(16, 16));
+    constructor(ctx, pos = new Vector2D(0, 0), sprite, speed = 2) {
+        super(ctx, pos, sprite, new Vector2D(16, 16));
         this.ctx = ctx;
         this.pos = pos;
         this.sprite = sprite;
         this.speed = speed;
         this.active = true;
         this.playerBullets = [];
-        this.vel = new Vec2D(0, 0);
+        this.vel = new Vector2D(0, 0);
     }
     // Bullet starts in the center of the player
     moveToMidpoint() {

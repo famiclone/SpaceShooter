@@ -1,13 +1,13 @@
-import { Vec2D } from './Vec2D.js';
+import { Vector2D } from './Vector.js';
 export default class GameObject {
-    constructor(ctx, pos, sprite, size = new Vec2D(16, 16)) {
+    constructor(ctx, pos, sprite, size = new Vector2D(16, 16)) {
         this.ctx = ctx;
         this.pos = pos;
         this.sprite = sprite;
         this.size = size;
         this.canvas = ctx.canvas;
         this.image = new Image();
-        this.pos = new Vec2D(pos.x, pos.y);
+        this.pos = new Vector2D(pos.x, pos.y);
         this.active = true;
     }
     isBounds() {

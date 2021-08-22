@@ -1,4 +1,5 @@
-import { Vec2D } from './Vec2D';
+// @ts-nocheck
+import { Vector2D } from './Vector.js';
 
 export class Sprite {
   img: HTMLImageElement;
@@ -10,7 +11,7 @@ export class Sprite {
     public image,
     public name,
     public spritesheet,
-    public size: Vec2D = new Vec2D(16, 16),
+    public size: Vector2D = new Vector2D(16, 16),
   ) {
     this.canvas = document.createElement('canvas');
 
@@ -40,6 +41,6 @@ export class Sprite {
 
   private getPosition() {
     const el = this.spritesheet[this.name] || [0, 0];
-    return new Vec2D(el[0], el[1]);
+    return new Vector2D(el[0], el[1]);
   }
 }

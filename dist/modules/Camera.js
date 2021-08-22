@@ -1,8 +1,8 @@
 // @ts-nocheck
-import { Vec2D } from './Vec2D.js';
+import { Vector2D } from './Vector.js';
 export class Camera {
     constructor(x, y) {
-        this.pos = new Vec2D(x, y);
+        this.pos = new Vector2D(x, y);
         this.speed = 10;
     }
     update() {

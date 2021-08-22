@@ -1,5 +1,5 @@
 export const config = {
-    width: 255,
-    height: 240,
+    width: window.innerWidth / 2 - 100,
+    height: window.innerHeight / 2 - 100,
     title: 'SpaceShooter',
 };
