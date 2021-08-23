@@ -2,14 +2,14 @@
 export class AssetLoader {
   constructor(private toLoad: number = 0, private loaded: number = 0) {}
 
-  load(assets) {
+  load(assets: string[]) {
     const imageExt = ['png'];
     const jsonExt = ['json'];
 
     this.toLoad = assets.length;
     return new Promise((resolve) => {
       assets.forEach((asset) => {
-        const extension = asset.split('.').pop();
+        const extension = asset.split('.').pop() || '';
 
         if (imageExt.includes(extension)) {
           this.loadImage(asset, resolve);
@@ -29,9 +29,10 @@ export class AssetLoader {
     }
   }
 
-  loadImage(src, resolve) {
+  loadImage(src: string, resolve) {
     const image = new Image();
     image.src = src;
+
     image.addEventListener(
       'load',
       () => {
@@ -40,7 +41,10 @@ export class AssetLoader {
       false,
     );
     const name = src.split('/').pop().split('.')[0];
-    this[name] = image;
+
+    if (name) {
+      this[name] = image;
+    }
   }
 
   async loadJson(src, resolve) {

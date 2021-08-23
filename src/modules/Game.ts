@@ -64,12 +64,15 @@ export default class Game {
   };
   ui: HTMLDivElement;
   enemies: Enemy[];
+  nextTime: number;
   state: {
     score: number;
     playerSpeed: number;
+    timer: number;
   };
-  bg: any;
+  bg: Background;
   player: Player;
+  nextTime: number;
   fontRenderer: FontRenderer;
   loaded: number;
 
@@ -85,11 +88,13 @@ export default class Game {
     );
     this.ui.className = 'ui';
     this.enemies = [];
+    this.nextTime = 0;
     this.bg = new Background();
 
     this.state = {
       score: 0,
       playerSpeed: 3,
+      timer: 0,
     };
 
     this.assets = null;
@@ -134,9 +139,25 @@ export default class Game {
       new Vector2D(8, 8),
     );
 
-    this.miniMap = miniMap;
+    this.timerUI = new FontRenderer(
+      this.assets.font,
+      this.assets.fontMap,
+      new Vector2D(80, 8),
+    );
 
+    this.miniMap = miniMap;
     window.game = this;
+
+    this.levelMapObj = this.level.levelmap.map((row, y) => {
+      return row.map((val, x) => {
+        // Material object must be include
+        return {
+          id: val,
+          pos: { x: x * 16, y: y * 16 },
+          size: { x: 16, y: 16 },
+        };
+      });
+    });
   }
 
   initKeyboardController() {
@@ -228,12 +249,34 @@ export default class Game {
         this.player.explode();
       }
     });
+
+    this.levelMapObj.map((row, y) => {
+      row.map((v, x) => {
+        if (v.id === 0) {
+          if (
+            this.isCollide(
+              {
+                ...v,
+                pos: {
+                  x: v.pos.x + this.level.pos.x,
+                  y: v.pos.y + this.level.pos.y,
+                },
+              },
+              this.player,
+            )
+          ) {
+            console.log(true);
+            this.level.pos.x -= v.pos.x - this.player.pos.x;
+            this.level.pos.y -= v.pos.y - this.player.pos.y;
+          }
+        }
+      });
+    });
   }
 
   draw(screen): void {
     screen.clear();
     this.hud.clear();
-    // this.fontRenderer.drawText(screen.ctx, 'A');
     this.level.draw(screen.ctx);
     this.bg.draw(screen.ctx);
     this.player.draw(screen.ctx);
@@ -248,6 +291,11 @@ export default class Game {
       `SCORE ${this.state.score.toString()}`,
       new Vector2D(8, 8),
     );
+    this.timerUI.drawText(
+      this.hud.ctx,
+      `TIME ${Math.ceil(this.state.timer).toString()}`,
+      new Vector2D(8, 8),
+    );
     this.hud.ctx?.drawImage(
       this.miniMap,
       this.screen.size.x - this.miniMap.width,
@@ -255,7 +303,7 @@ export default class Game {
     );
   }
 
-  update() {
+  update(delta: number): void {
     this.level.update();
     this.player.update();
     // Screen collision
@@ -271,6 +319,12 @@ export default class Game {
     if (this.player.pos.y < 0) {
       this.player.pos.y = 0;
     }
+
+    if (this.nextTime >= 1000) {
+      this.nextTime = 0;
+      this.state.timer += 1 / 60;
+    }
+
     this.ui.textContent = this.state.score.toString();
     this.handleCollision();
     this.player.playerBullets.map((bullet) => {
@@ -281,7 +335,7 @@ export default class Game {
       }
     });
     this.enemies.map((enemy) => enemy.update());
-    this.bg.update();
+    this.bg.update(delta);
     this.enemies = this.enemies.filter((enemy) => enemy.active);
     this.player.playerBullets = this.player.playerBullets.filter(
       (bullet) => bullet.active,
@@ -301,14 +355,19 @@ export default class Game {
         ),
       );
     }
+
+    this.nextTime += delta;
   }
 
-  run() {
+  run(time: number = 0) {
     if (this.loaded) {
+      const delta = time - this.nextTime;
       this.draw(this.screen);
-      this.update();
+      this.update(delta);
+
+      this.nextTime = time;
     }
 
-    requestAnimationFrame(() => this.run());
+    requestAnimationFrame((t) => this.run(t));
   }
 }

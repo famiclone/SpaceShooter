@@ -50,10 +50,12 @@ export default class Game {
         this.hud = new Screen(new Vector2D(this.config.width, this.config.height), 'hud');
         this.ui.className = 'ui';
         this.enemies = [];
+        this.nextTime = 0;
         this.bg = new Background();
         this.state = {
             score: 0,
             playerSpeed: 3,
+            timer: 0,
         };
         this.assets = null;
         this.loaded = false;
@@ -70,8 +72,19 @@ export default class Game {
         const { dataMap: levelMap, canvas: miniMap } = parseImageMap(this.assets.level01);
         this.level = new Level(this.assets.tileset, this.assets.tilesetMap, levelMap);
         this.fontRenderer = new FontRenderer(this.assets.font, this.assets.fontMap, new Vector2D(8, 8));
+        this.timerUI = new FontRenderer(this.assets.font, this.assets.fontMap, new Vector2D(80, 8));
         this.miniMap = miniMap;
         window.game = this;
+        this.levelMapObj = this.level.levelmap.map((row, y) => {
+            return row.map((val, x) => {
+                // Material object must be include
+                return {
+                    id: val,
+                    pos: { x: x * 16, y: y * 16 },
+                    size: { x: 16, y: 16 },
+                };
+            });
+        });
     }
     initKeyboardController() {
         const onKeyDown = (e) => {
@@ -152,11 +165,27 @@ export default class Game {
                 this.player.explode();
             }
         });
+        this.levelMapObj.map((row, y) => {
+            row.map((v, x) => {
+                if (v.id === 0) {
+                    if (this.isCollide({
+                        ...v,
+                        pos: {
+                            x: v.pos.x + this.level.pos.x,
+                            y: v.pos.y + this.level.pos.y,
+                        },
+                    }, this.player)) {
+                        console.log(true);
+                        this.level.pos.x -= v.pos.x - this.player.pos.x;
+                        this.level.pos.y -= v.pos.y - this.player.pos.y;
+                    }
+                }
+            });
+        });
     }
     draw(screen) {
         screen.clear();
         this.hud.clear();
-        // this.fontRenderer.drawText(screen.ctx, 'A');
         this.level.draw(screen.ctx);
         this.bg.draw(screen.ctx);
         this.player.draw(screen.ctx);
@@ -167,9 +196,10 @@ export default class Game {
             bullet.draw(screen.ctx);
         });
         this.fontRenderer.drawText(this.hud.ctx, `SCORE ${this.state.score.toString()}`, new Vector2D(8, 8));
+        this.timerUI.drawText(this.hud.ctx, `TIME ${Math.ceil(this.state.timer).toString()}`, new Vector2D(8, 8));
         this.hud.ctx?.drawImage(this.miniMap, this.screen.size.x - this.miniMap.width, 0);
     }
-    update() {
+    update(delta) {
         this.level.update();
         this.player.update();
         // Screen collision
@@ -185,6 +215,10 @@ export default class Game {
         if (this.player.pos.y < 0) {
             this.player.pos.y = 0;
         }
+        if (this.nextTime >= 1000) {
+            this.nextTime = 0;
+            this.state.timer += 1 / 60;
+        }
         this.ui.textContent = this.state.score.toString();
         this.handleCollision();
         this.player.playerBullets.map((bullet) => {
@@ -196,19 +230,22 @@ export default class Game {
             }
         });
         this.enemies.map((enemy) => enemy.update());
-        this.bg.update();
+        this.bg.update(delta);
         this.enemies = this.enemies.filter((enemy) => enemy.active);
         this.player.playerBullets = this.player.playerBullets.filter((bullet) => bullet.active);
         // Random spawn enemies
         if (Math.round(Math.random() * 90) == 1) {
             this.enemies.push(new Enemy(this.screen.ctx, { x: 0, y: 0 }, new Sprite(this.assets.spritesheet, 'enemy', this.assets.spritesheetMap, new Vector2D(16, 16)).sprite));
         }
+        this.nextTime += delta;
     }
-    run() {
+    run(time = 0) {
         if (this.loaded) {
+            const delta = time - this.nextTime;
             this.draw(this.screen);
-            this.update();
+            this.update(delta);
+            this.nextTime = time;
         }
-        requestAnimationFrame(() => this.run());
+        requestAnimationFrame((t) => this.run(t));
     }
 }

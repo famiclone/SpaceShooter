@@ -1,5 +1,5 @@
-run: parcel-clean
-	npx parcel --no-cache ./src/index.html
+run:
+	npx browser-sync ./dist/index.html
 
 parcel-clean:
 	rm -rf ./dist .cache

@@ -10,7 +10,7 @@ export class AssetLoader {
         this.toLoad = assets.length;
         return new Promise((resolve) => {
             assets.forEach((asset) => {
-                const extension = asset.split('.').pop();
+                const extension = asset.split('.').pop() || '';
                 if (imageExt.includes(extension)) {
                     this.loadImage(asset, resolve);
                 }
@@ -35,7 +35,9 @@ export class AssetLoader {
             this.loadHandler(resolve);
         }, false);
         const name = src.split('/').pop().split('.')[0];
-        this[name] = image;
+        if (name) {
+            this[name] = image;
+        }
     }
     async loadJson(src, resolve) {
         try {

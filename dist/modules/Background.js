@@ -9,6 +9,7 @@ class Star {
         this.active = true;
         this.vel = new Vector2D(0, 0);
         this.color = `rgba(255, 255, 255, ${this.speed / 2})`;
+        this.a = 0;
     }
     draw(ctx) {
         ctx.fillStyle = this.color;
@@ -16,10 +17,14 @@ class Star {
         circle.arc(this.pos.x, this.pos.y, this.size.x, 0, 2 * Math.PI);
         ctx.fill(circle);
     }
-    update(vel) {
+    update(delta, vel) {
+        // if (this.a >= 1000) {
+        this.a = 0;
         this.pos.y += vel.y * this.speed;
         this.pos.x += vel.x * this.speed;
         this.active = this.active && checkBoundsCollide(this);
+        // }
+        // this.a += delta;
     }
 }
 export default class Background {
@@ -55,9 +60,9 @@ export default class Background {
             star.draw(ctx);
         });
     }
-    update() {
+    update(delta) {
         this.stars.map((star) => {
-            star.update(this.vel);
+            star.update(delta, this.vel);
         });
         this.stars = this.stars.filter((star) => star.active);
     }
