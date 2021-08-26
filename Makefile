@@ -1,5 +1,5 @@
 run:
-	npx browser-sync ./dist/index.html
+	npx browser-sync start -s ./dist
 
 parcel-clean:
 	rm -rf ./dist .cache
