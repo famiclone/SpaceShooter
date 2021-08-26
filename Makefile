@@ -4,6 +4,9 @@ run:
 git-clean:
 	git rm -r --cached .
 
+clean:
+	rm -rf dist
+
 build: clean
 	tsc 
 
