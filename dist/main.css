@@ -1,0 +1,24 @@
+body {
+  background-color: #303030;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+#app {
+  position: relative;
+  zoom: 2;
+  border: 1px solid white;
+}
+
+canvas {
+  /* border: 1px solid white; */
+  image-rendering: pixelated;
+}
+
+#hud {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
