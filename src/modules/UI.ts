@@ -1,9 +1,5 @@
 export default class UI {
-	constructor(ctx, config) {
-		this.ctx = ctx;
-		this.config = config;
-	}
+  constructor(public ctx: CanvasRenderingContext2D, public config: any) {}
 
-	draw() {
-	}
-} 
+  draw() {}
+}

@@ -1,55 +1,60 @@
+// @ts-nocheck
 export class AssetLoader {
   constructor(private toLoad: number = 0, private loaded: number = 0) {}
 
-  load(assets) {
-    const imageExt = ['png']
-    const jsonExt = ['json']
+  load(assets: string[]) {
+    const imageExt = ['png'];
+    const jsonExt = ['json'];
 
-    this.toLoad = assets.length
+    this.toLoad = assets.length;
     return new Promise((resolve) => {
       assets.forEach((asset) => {
-        const extension = asset.split('.').pop()
+        const extension = asset.split('.').pop() || '';
 
         if (imageExt.includes(extension)) {
-          this.loadImage(asset, resolve)
+          this.loadImage(asset, resolve);
         } else if (jsonExt.includes(extension)) {
-          this.loadJson(asset, resolve)
+          this.loadJson(asset, resolve);
         }
-      })
-    })
+      });
+    });
   }
 
   loadHandler(resolve) {
-    this.loaded += 1
+    this.loaded += 1;
     if (this.loaded === this.toLoad) {
-      this.loaded = 0
-      this.toLoad = 0
-      resolve(this)
+      this.loaded = 0;
+      this.toLoad = 0;
+      resolve(this);
     }
   }
 
-  loadImage(src, resolve) {
-    const image = new Image()
-    image.src = src
+  loadImage(src: string, resolve) {
+    const image = new Image();
+    image.src = src;
+
     image.addEventListener(
       'load',
       () => {
-        this.loadHandler(resolve)
+        this.loadHandler(resolve);
       },
-      false
-    )
-    const name = src.split('/').pop().split('.')[0]
-    this[name] = image
+      false,
+    );
+    const name = src.split('/').pop().split('.')[0];
+
+    if (name) {
+      this[name] = image;
+    }
   }
 
   async loadJson(src, resolve) {
     try {
-      const response: Response = await fetch(src)
-      const data: any = await response
-      this.loadHandler(resolve)
+      const response: Response = await fetch(src);
+      const data: any = await response.json();
+      this.loadHandler(resolve);
 
-      const name = src.split('/').pop().split('.')[0]
-      this[name] = data
+      const name = src.split('/').pop().split('.')[0];
+      this[name] = data;
     } catch (error) {}
   }
 }

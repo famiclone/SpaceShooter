@@ -1,8 +1,5 @@
 // @ts-nocheck
-
 import Game from './modules/Game.js';
 import { config } from './config.js';
-
-const game: Game = new Game(config);
-
+const game = new Game(config);
 game.init();

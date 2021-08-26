@@ -1,4 +1,5 @@
-import { Vec2D } from './Vec2D';
+// @ts-nocheck
+import { Vector2D } from './Vector.js';
 
 export class Level {
   constructor(tileset, tilesetJson, levelMap) {
@@ -6,9 +7,9 @@ export class Level {
     this.tilesetJson = tilesetJson;
     this.image = tileset;
 
-    this.pos = new Vec2D(0, 0);
-    this.size = new Vec2D(16, 16);
-    this.vel = new Vec2D(0, 0);
+    this.pos = new Vector2D(0, 0);
+    this.size = new Vector2D(16, 16);
+    this.vel = new Vector2D(0, 0);
     this.width = this.size.x * 16;
     this.height = this.size.y * 16;
 
@@ -43,7 +44,7 @@ export class Level {
   }
   private getPosition(name) {
     const el = this.tilesetJson[name] || [-16, 0];
-    return new Vec2D(el[0], el[1]);
+    return new Vector2D(el[0], el[1]);
   }
 
   draw(ctx) {
@@ -52,13 +53,6 @@ export class Level {
         const tile = y === '#ff0000' ? 'lightgray' : 'gray';
         const pos = this.getPosition(y);
 
-        // ctx.fillStyle = tile;
-        // ctx.fillRect(
-        //   this.pos.x + this.size.x * j,
-        //   this.pos.y + this.size.y * i,
-        //   this.size.x,
-        //   this.size.y,
-        // );
         ctx.drawImage(
           this.image,
           pos.x,

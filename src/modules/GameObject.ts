@@ -1,22 +1,23 @@
-import { SpriteProps } from '../types';
-import { Sprite } from './Sprite';
-import { Vec2D } from './Vec2D';
+// @ts-nocheck
+// import { SpriteProps } from '../types';
+import { Sprite } from './Sprite.js';
+import { Vector2D } from './Vector.js';
 
 export default class GameObject {
   active: boolean;
   canvas: HTMLCanvasElement;
   image: HTMLImageElement;
-  vel: Vec2D;
+  vel: Vector2D;
 
   constructor(
     public ctx: CanvasRenderingContext2D,
-    public pos: Vec2D,
+    public pos: Vector2D,
     public sprite: Sprite,
-    public size: Vec2D = new Vec2D(16, 16),
+    public size: Vector2D = new Vector2D(16, 16),
   ) {
     this.canvas = ctx.canvas;
     this.image = new Image();
-    this.pos = new Vec2D(pos.x, pos.y);
+    this.pos = new Vector2D(pos.x, pos.y);
     this.active = true;
   }
 
@@ -29,7 +30,7 @@ export default class GameObject {
     );
   }
 
-  draw(ctx) {
+  draw(ctx: CanvasRenderingContext2D) {
     ctx.drawImage(this.sprite, this.pos.x, this.pos.y);
   }
 
