@@ -8,7 +8,7 @@ clean:
 	rm -rf dist
 
 build: clean
-	tsc 
+	tsc && cp ./src/index.html ./dist && cp ./src/main.css ./dist && cp -r ./src/images ./dist && cp -r ./src/levels ./dist
 
 deploy: build
 	git subtree push --prefix="dist"  origin gh-pages
