@@ -21,8 +21,8 @@ class Player extends GameObject {
   ) {
     super(ctx, pos, sprite, new Vector2D(16, 16));
     this.active = true;
-    this.playerBullets = [];
     this.vel = new Vector2D(0, 0);
+    this.playerBullets = [];
   }
 
   // Bullet starts in the center of the player
@@ -65,6 +65,9 @@ class Player extends GameObject {
   }
 
   update() {
+    this.playerBullets.map((bullet: Bullet) => {
+      bullet.update();
+    });
     this.pos.set(
       this.pos.x + this.vel.x * this.speed,
       this.pos.y + this.vel.y * this.speed,
