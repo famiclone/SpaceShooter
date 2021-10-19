@@ -1,10 +1,21 @@
 // @ts-nocheck
+
 export class AssetLoader {
-  constructor(private toLoad: number = 0, private loaded: number = 0) {}
+  private toLoad: number;
+  private loaded: number;
+  isLoaded: boolean;
+  list: { [key: string]: Object | ImageBitmap };
+  constructor() {
+    this.toLoad = 0;
+    this.loaded = 0;
+    this.isLoaded = false;
+    this.list = [];
+  }
 
   load(assets: string[]) {
     const imageExt = ['png'];
     const jsonExt = ['json'];
+    const configExt = ['toml'];
 
     this.toLoad = assets.length;
     return new Promise((resolve) => {
@@ -15,6 +26,8 @@ export class AssetLoader {
           this.loadImage(asset, resolve);
         } else if (jsonExt.includes(extension)) {
           this.loadJson(asset, resolve);
+        } else if (configExt.includes(extension)) {
+          this.loadConfig(asset, resolve);
         }
       });
     });
@@ -26,6 +39,7 @@ export class AssetLoader {
       this.loaded = 0;
       this.toLoad = 0;
       resolve(this);
+      this.isLoaded = true;
     }
   }
 
@@ -43,8 +57,27 @@ export class AssetLoader {
     const name = src.split('/').pop().split('.')[0];
 
     if (name) {
-      this[name] = image;
+      this.list[name] = image;
     }
+  }
+
+  async loadConfig(src, resolve) {
+    fetch(src)
+      .then((data) => data.text())
+      .then((text) => {
+        const config = text.split('\n').reduce((obj, str) => {
+          const [key, value] = str.trim().split('=');
+          if (!key || !value) return obj;
+          obj[key.trim()] = value.trim();
+          return obj;
+        }, {});
+
+        const name = src.split('/').pop().split('.')[0];
+
+        if (name) {
+          this.list[name] = config;
+        }
+      });
   }
 
   async loadJson(src, resolve) {
@@ -54,7 +87,7 @@ export class AssetLoader {
       this.loadHandler(resolve);
 
       const name = src.split('/').pop().split('.')[0];
-      this[name] = data;
+      this.list[name] = data;
     } catch (error) {}
   }
 }

@@ -1,0 +1,363 @@
+import Player from './Player.js';
+import Screen from './Screen.js';
+import Enemy from './Enemy.js';
+import FontRenderer from './FontRenderer.js';
+import { GameConfigProps, ObjectType } from '../types.js';
+import { checkBoundsCollide, RGBAToHEX } from '../helpers/index.js';
+
+import { Vector2D } from './Vector.js';
+import { Sprite } from './Sprite.js';
+import { Level } from './Level.js';
+
+import { AssetLoader } from './AssetLoader.js';
+import { Scene } from './Scene.js';
+
+const assets = [
+  './images/font.png',
+  './images/fontMap.json',
+  './images/spritesheet.png',
+  './images/spritesheetMap.json',
+  './levels/level01.png',
+  './images/tileset.png',
+  './images/tilesetMap.json',
+  './config.toml',
+];
+interface GameProps {
+  assets: AssetLoader;
+}
+
+export default class Game implements GameProps {
+  //@ts-ignore
+  assets: AssetLoader['list'];
+  scene: Scene;
+
+  screen: Screen;
+  hud: Screen;
+  // level: {
+  //   map: number[][];
+  // };
+  ui: HTMLDivElement;
+  enemies: Enemy[];
+  nextTime: number;
+  state: {
+    score: number;
+    playerSpeed: number;
+    timer: number;
+  };
+  // fontRenderer: FontRenderer;
+
+  constructor(private config: GameConfigProps) {
+    this.ui = document.createElement('div');
+    // this.scene = new SceneLoader();
+    this.screen = new Screen(
+      new Vector2D(this.config.width, this.config.height),
+    );
+    this.hud = new Screen(
+      new Vector2D(this.config.width, this.config.height),
+      'hud',
+    );
+    this.assets = {};
+    this.ui.className = 'ui';
+    this.enemies = [];
+    this.nextTime = 0;
+    this.scene = new Scene();
+
+    this.state = {
+      score: 0,
+      playerSpeed: 3,
+      timer: 0,
+    };
+
+    //@ts-ignore
+    new AssetLoader().load(assets).then((assets) => this.setup(assets));
+  }
+
+  setup(assets: ObjectType) {
+    this.assets = assets;
+
+    // console.log(this.assets, this.screen);
+
+    const player = new Player(
+      // @ts-ignore
+      this.screen.ctx,
+      new Vector2D(this.screen.size.x / 2, this.screen.size.y - 48),
+      new Sprite(
+        // @ts-ignore
+        this.assets.list.spritesheet,
+        'player',
+        // @ts-ignore
+        this.assets.list.spritesheetMap,
+        new Vector2D(16, 16),
+        // @ts-ignore
+      ).sprite,
+      this.state.playerSpeed,
+    );
+
+    // console.log(player);
+
+    this.scene.player = player;
+
+    this.initKeyboardController();
+
+    // @ts-ignore
+    this.level = new Level(
+      {
+        // @ts-ignore
+        image: this.assets.list.tileset,
+        // @ts-ignore
+        sheet: this.assets.list.tilesetMap,
+      },
+      // @ts-ignore
+      this.assets.list.level01,
+    );
+
+    this.fontRenderer = new FontRenderer(
+      this.assets.list.font,
+      this.assets.list.fontMap,
+      new Vector2D(8, 8),
+    );
+
+    this.timerUI = new FontRenderer(
+      this.assets.list.font,
+      this.assets.list.fontMap,
+      new Vector2D(80, 8),
+    );
+
+    window.game = this;
+
+    this.levelMapObj = this.level.map.map((row, y) => {
+      return row.map((val, x) => {
+        // Material object must be include
+        return {
+          id: val,
+          pos: { x: x * 16, y: y * 16 },
+          size: { x: 16, y: 16 },
+        };
+      });
+    });
+
+    // console.table(this.level.map);
+  }
+
+  initKeyboardController() {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const { code } = e;
+
+      switch (code) {
+        case 'KeyD':
+          // this.level.moveRight();
+          this.scene.player.moveRight();
+          // this.bg.vel.set(-1, this.bg.vel.y);
+          break;
+        case 'KeyW':
+          this.scene.player.moveUp();
+          // this.level.moveUp();
+          // this.bg.vel.set(this.bg.vel.x, 1);
+          break;
+        case 'KeyS':
+          this.scene.player.moveDown();
+          // this.level.moveDown();
+          // this.bg.vel.set(this.bg.vel.x, -1);
+          break;
+        case 'KeyA':
+          this.scene.player.moveLeft();
+          // this.level.moveLeft();
+          // this.bg.vel.set(1, this.bg.vel.y);
+          break;
+        case 'Space':
+          this.scene.player.shoot();
+          break;
+        default:
+        //
+      }
+    };
+
+    const onKeyUp = (e: KeyboardEvent) => {
+      const { code } = e;
+
+      switch (code) {
+        case 'KeyD':
+          this.scene.player.vel.x = 0;
+          // this.level.stop('x');
+          // this.bg.stop('x');
+          break;
+        case 'KeyW':
+          this.scene.player.vel.y = 0;
+          // this.level.stop('y');
+          // this.bg.stop('y');
+          break;
+        case 'KeyS':
+          this.scene.player.vel.y = 0;
+          // this.level.stop('y');
+          // this.bg.stop('y');
+          break;
+        case 'KeyA':
+          this.scene.player.vel.x = 0;
+          // this.level.stop('x');
+          // this.bg.stop('x');
+          break;
+        default:
+        //
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+  }
+
+  init() {
+    this.initKeyboardController();
+    this.run();
+  }
+
+  isCollide(a, b) {
+    return (
+      a.pos.x < b.pos.x + b.size.x &&
+      a.pos.x + a.size.x > b.pos.x &&
+      a.pos.y < b.pos.y + b.size.y &&
+      a.pos.y + a.size.y > b.pos.y
+    );
+  }
+
+  handleCollision() {
+    this.scene.player.playerBullets.map((bullet) => {
+      this.enemies.map((enemy) => {
+        if (this.isCollide(bullet, enemy)) {
+          enemy.explode();
+          this.state.score += 100;
+          bullet.active = false;
+        }
+      });
+    });
+    // this.enemies.map((enemy) => {
+    //   if (this.isCollide(enemy, this.scene.player)) {
+    //     enemy.explode();
+    //     this.scene.player.explode();
+    //   }
+    // });
+    // this.levelMapObj.map((row, y) => {
+    //   row.map((v, x) => {
+    //     if (v.id === 0) {
+    //       if (
+    //         this.isCollide(
+    //           {
+    //             ...v,
+    //             pos: {
+    //               x: v.pos.x + this.level.pos.x,
+    //               y: v.pos.y + this.level.pos.y,
+    //             },
+    //           },
+    //           this.scene.player,
+    //         )
+    //       ) {
+    //         console.log(true);
+    //         this.level.pos.x -= v.pos.x - this.scene.player.pos.x;
+    //         this.level.pos.y -= v.pos.y - this.scene.player.pos.y;
+    //       }
+    //     }
+    //   });
+    // });
+  }
+
+  draw(screen): void {
+    screen.clear();
+    this.hud.clear();
+    this.level.draw(screen.ctx);
+    this.enemies.map((enemy) => {
+      enemy.draw(screen.ctx);
+    });
+
+    this.scene.draw(screen.ctx);
+    // this.scene.player.playerBullets.map((bullet) => {
+    //   bullet.draw(screen.ctx);
+    // });
+    this.fontRenderer.drawText(
+      this.hud.ctx,
+      `SCORE ${this.state.score.toString()}`,
+      new Vector2D(8, 8),
+    );
+    this.timerUI.drawText(
+      this.hud.ctx,
+      `TIME ${Math.ceil(this.state.timer).toString()}`,
+      new Vector2D(8, 8),
+    );
+    // this.hud.ctx?.drawImage(
+    //   this.miniMap,
+    //   this.screen.size.x - this.miniMap.width,
+    //   0,
+    // );
+  }
+
+  update(delta: number): void {
+    this.level.update();
+    this.scene.update();
+    // Screen collision
+    if (
+      this.scene.player.pos.x + this.scene.player.size.x >
+      this.screen.size.x
+    ) {
+      this.scene.player.pos.x = this.screen.size.x - this.scene.player.size.x;
+    }
+    if (this.scene.player.pos.x < 0) {
+      this.scene.player.pos.x = 0;
+    }
+    if (
+      this.scene.player.pos.y + this.scene.player.size.y >
+      this.screen.size.y
+    ) {
+      this.scene.player.pos.y = this.screen.size.x - this.scene.player.size.y;
+    }
+    if (this.scene.player.pos.y < 0) {
+      this.scene.player.pos.y = 0;
+    }
+
+    if (this.nextTime >= 1000) {
+      this.nextTime = 0;
+      this.state.timer += 1 / 60;
+    }
+
+    this.ui.textContent = this.state.score.toString();
+    this.handleCollision();
+    this.scene.player.playerBullets.map((bullet) => {
+      if (!checkBoundsCollide(bullet)) {
+        bullet.active = false;
+      } else {
+        bullet.update();
+      }
+    });
+    this.enemies.map((enemy) => enemy.update());
+    this.enemies = this.enemies.filter((enemy) => enemy.active);
+    this.scene.player.playerBullets = this.scene.player.playerBullets.filter(
+      (bullet) => bullet.active,
+    );
+    // Random spawn enemies
+    // if (Math.round(Math.random() * 90) == 1) {
+    //   this.enemies.push(
+    //     new Enemy(
+    //       this.screen.ctx,
+    //       { x: 0, y: 0 },
+    //       new Sprite(
+    //         this.assets.spritesheet,
+    //         'enemy',
+    //         this.assets.spritesheetMap,
+    //         new Vector2D(16, 16),
+    //       ).sprite,
+    //     ),
+    //   );
+    // }
+
+    this.nextTime += delta;
+  }
+
+  run(time: number = 0) {
+    if (this.assets?.isLoaded) {
+      const delta = time - this.nextTime;
+      this.draw(this.screen);
+      this.update(delta);
+
+      this.nextTime = time;
+    }
+
+    requestAnimationFrame((t) => this.run(t));
+  }
+}

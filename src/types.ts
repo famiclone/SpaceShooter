@@ -49,3 +49,8 @@ export interface SpriteProps {
   src: string;
   pos: Vector2D;
 }
+
+export interface SpriteSheetProps {
+  image: ImageBitmap;
+  sheet: { [spriteName: string]: [number, number] }[];
+}

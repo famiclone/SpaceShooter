@@ -1,60 +1,77 @@
-// @ts-nocheck
+import { RGBAToHEX } from '../helpers/index.js';
+import { LevelImgMap, SpriteSheetProps } from '../types.js';
 import { Vector2D } from './Vector.js';
 
-export class Level {
-  constructor(tileset, tilesetJson, levelMap) {
-    this.levelmap = levelMap;
-    this.tilesetJson = tilesetJson;
-    this.image = tileset;
+interface LevelProps {
+  tileSet: SpriteSheetProps;
+  map: number[][];
+
+  update: () => void;
+  draw: (ctx: CanvasRenderingContext2D) => void;
+  parseImage: (image: ImageBitmap) => number[][];
+}
+export class Level implements LevelProps {
+  map: number[][];
+  tileSet: SpriteSheetProps;
+  pos: Vector2D;
+  size: Vector2D;
+  width: number;
+  height: number;
+
+  constructor(tileSet: SpriteSheetProps, levelImage: ImageBitmap) {
+    this.tileSet = tileSet;
+    this.map = this.parseImage(levelImage);
 
     this.pos = new Vector2D(0, 0);
     this.size = new Vector2D(16, 16);
-    this.vel = new Vector2D(0, 0);
     this.width = this.size.x * 16;
     this.height = this.size.y * 16;
-
-    this.speed = 5;
   }
 
-  update() {
-    this.pos.set(
-      this.pos.x + this.vel.x * this.speed,
-      this.pos.y + this.vel.y * this.speed,
-    );
+  update() {}
+
+  parseImage(image: ImageBitmap): number[][] {
+    const canvas = document.createElement('canvas');
+
+    const dataMap = [];
+
+    const imageWidth: number = image.width;
+    const imageHeight: number = image.height;
+
+    canvas.width = imageWidth;
+    canvas.height = imageHeight;
+
+    const ctx = canvas.getContext('2d')!;
+
+    ctx.drawImage(image, 0, 0, imageWidth, imageHeight);
+
+    for (let y = 0; y < imageHeight; y++) {
+      const arr = [];
+      for (let x = 0; x < imageWidth; x++) {
+        const pixel: Uint8ClampedArray = ctx.getImageData(x, y, 1, 1).data;
+        // @ts-ignore
+        arr.push(LevelImgMap[RGBAToHEX(pixel[0], pixel[1], pixel[2])]);
+      }
+      dataMap.push(arr);
+    }
+
+    return dataMap;
   }
 
-  moveUp() {
-    this.vel.set(this.vel.x, 1);
-  }
-
-  moveRight() {
-    this.vel.set(-1, this.vel.y);
-  }
-
-  moveDown() {
-    this.vel.set(this.vel.x, -1);
-  }
-
-  moveLeft() {
-    this.vel.set(1, this.vel.y);
-  }
-
-  stop(d) {
-    this.vel[d] = 0;
-  }
-  private getPosition(name) {
-    const el = this.tilesetJson[name] || [-16, 0];
+  private getPosition(name: number): Vector2D {
+    const el = this.tileSet.sheet[name] || [-16, 0];
+    // @ts-ignore
     return new Vector2D(el[0], el[1]);
   }
 
-  draw(ctx) {
-    this.levelmap.map((x, i) => {
+  draw(ctx: CanvasRenderingContext2D) {
+    this.tileSet.sheet.map((x, i) => {
+      // @ts-ignore
       x.map((y, j) => {
-        const tile = y === '#ff0000' ? 'lightgray' : 'gray';
         const pos = this.getPosition(y);
 
         ctx.drawImage(
-          this.image,
+          this.tileSet.image,
           pos.x,
           pos.y,
           this.size.x,
